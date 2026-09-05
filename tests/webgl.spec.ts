@@ -206,3 +206,46 @@ test("repeated angle and candidate changes keep GPU textures bounded", async ({
     "active",
   );
 });
+
+test("portrait particles form before the photo, and the opening can replay", async ({ page }, info) => {
+  await page.goto("/");
+  const hero = page.locator("[data-intro]");
+  const photo = page.locator("[data-hero-photo]");
+  await expect(hero).toHaveAttribute("data-intro", "forming");
+  expect(await photo.evaluate(e => Number(getComputedStyle(e).opacity))).toBeLessThan(.2);
+  await expect(hero).toHaveAttribute("data-intro", "portrait");
+  const canvas = page.getByTestId("particle-opening").locator("canvas");
+  const count = Number(await canvas.getAttribute("data-particles"));
+  expect(count).toBeGreaterThan(0);
+  expect(count).toBeLessThanOrEqual(info.project.name === "desktop" ? 6000 : 700);
+  await expect(hero).toHaveAttribute("data-intro", "rest");
+  await expect(photo).toHaveCSS("opacity", "1");
+  await expect(page.getByTestId("particle-opening")).toHaveCount(0);
+  await page.getByRole("button", { name: "人物形成の演出を再生" }).click();
+  await expect(hero).toHaveAttribute("data-intro", "forming");
+  await page.getByRole("button", { name: "SKIP INTRO ↗" }).click();
+  await expect(hero).toHaveAttribute("data-intro", "rest");
+  await expect(photo).toHaveCSS("opacity", "1");
+});
+
+test("missing portrait data reveals the photo and keeps the booking entry available", async ({ page }) => {
+  await page.route("**/data/hero-particles.json", route => route.abort());
+  await page.goto("/");
+  await expect(page.locator("[data-intro]")).toHaveAttribute("data-intro", "rest");
+  await expect(page.locator("[data-hero-photo]")).toHaveCSS("opacity", "1");
+  await expect(page.getByTestId("particle-opening")).toHaveCount(0);
+  expect(await page.evaluate(() => sessionStorage.getItem("noir-opening-portrait-v2"))).toBeNull();
+  await page.getByRole("button", { name: "EXPLORE YOUR STYLE" }).click();
+  await expect(page.locator("main")).toHaveAttribute("data-mode", "style");
+});
+
+test("context loss during formation restores the photograph", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.locator("[data-intro]")).toHaveAttribute("data-intro", "forming");
+  await page.getByTestId("particle-opening").locator("canvas").evaluate(canvas => {
+    const gl = (canvas as HTMLCanvasElement).getContext("webgl2");
+    gl?.getExtension("WEBGL_lose_context")?.loseContext();
+  });
+  await expect(page.locator("[data-intro]")).toHaveAttribute("data-intro", "rest");
+  await expect(page.locator("[data-hero-photo]")).toHaveCSS("opacity", "1");
+});

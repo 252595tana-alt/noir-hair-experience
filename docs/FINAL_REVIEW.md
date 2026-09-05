@@ -45,3 +45,9 @@
 - `pnpm audit --prod`：検査時点で既知の脆弱性0件。GitHub mainとVercel公開コミットの一致を確認。
 
 公開前の素材・情報差し替えは `.env.example`、`src/config/site.ts`、`src/data/styles.ts`、`src/data/stylists.ts`、`src/data/menu.ts` を使用します。
+
+## TOPの人物形成について
+
+TOPを再確認した結果、従来の楕円状の粒子では写真の人物を形成できていなかったため修正しました。現在はHERO写真から採った点群が集まり、顔・髪・肩を表した後に同じ位置の写真へ切り替わります。右下の↻から再生できます。STYLE別の360°素材不足はこの修正とは別で、上記の残件として継続します。
+
+この修正後の本番ビルドを使った全64ケースは60成功・4対象外です。TypeScript strict・ESLint（警告0件）・本番buildも成功しています。

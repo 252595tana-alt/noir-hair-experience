@@ -1,18 +1,14 @@
 "use client";
+import type { RefObject } from "react";
 import WebGLExperience from "../WebGLExperience";
-import { ParticleHead } from "./ParticleHead";
-export default function ParticleCanvas({
-  opening = false,
-  startedAt = 0,
-  onFailure,
-}: {
-  opening?: boolean;
-  startedAt?: number;
-  onFailure?: () => void;
+import { ParticleHead, type PortraitSamples, type FormationClock } from "./ParticleHead";
+export default function ParticleCanvas({ portrait, clock, onReady, onFailure }: {
+  portrait: PortraitSamples;
+  clock: RefObject<FormationClock>;
+  onReady: () => void;
+  onFailure: () => void;
 }) {
-  return (
-    <WebGLExperience continuous fps={opening ? 60 : 30} onFailure={onFailure}>
-      <ParticleHead opening={opening} startedAt={startedAt} />
-    </WebGLExperience>
-  );
+  return <WebGLExperience continuous fps={60} onFailure={onFailure}>
+    <ParticleHead portrait={portrait} clock={clock} onReady={onReady} />
+  </WebGLExperience>;
 }

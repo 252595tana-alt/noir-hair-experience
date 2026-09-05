@@ -90,3 +90,16 @@
 性能は `audit/before.json` / `after.json` のローカルChrome各1回のラボ計測。Mobile相当LCP 876→928ms、CLS 0→0、操作event duration最大240→208ms。HOMEのJS受信量427,654→431,271 bytes。LCP / CLSはこの環境で目標内だが、200msの操作目標は未達。これは実ユーザーのフィールドINPではない。
 
 未確認・公開前の残件：実店舗情報・正式料金・高解像度実作品・予約URLの設定、Safari本体と実機iPhone / Android、ネイティブLINE起動、OSのメモリ圧迫、公開ドメインのCWV / Rich Results / 予約完了確認。現状はデモのため検索非公開設定。実店舗確認フラグと公開フラグを設定するまでHairSalon / Personの実店舗schemaを出力しない。WebKitエミュレーションを実機Safariでの検証として扱わない。
+
+# TOP人物形成の修正（2026-09-05）
+
+以前のOpeningは楕円形と簡易的な髪の点群で、写真も最初から表示されており、人物形成として不十分だった。HERO原画像から6,000点の位置・色を採り、散開→人物点群→写真へ変更。粒子と写真のcrop / scaleを同じ計算に揃えた。初回再生に加え、右下の↻で再確認できる。
+
+- WebGL準備ができてから3.65秒の演出を開始。スマホは700点以下。
+- 点群が欠落・遅延した場合は写真へ復帰し、失敗を再生済みとして保存しない。
+- reduced-motion / Save-Data / WebGL不可では写真と操作を表示。
+- 形成中のcontext loss、SKIP、再生、Deep LinkをPC / Mobile / Tabletで確認。
+- 顔・髪・肩が現れる中間フレームと最終写真を実ブラウザのスクリーンショットで確認。
+- この変更後のCWVは旧Phase 4の測定値とは別途確認が必要。
+- 修正後の本番ビルドに対する全64ケースは60成功・4対象外。対象外はMobile / Tabletで使用しないGPUレンズ専用テスト。TypeScript strict、ESLint（警告も0件）、本番buildも成功。
+- Chrome PC・Pixel 7相当・iPhone WebKit相当の3プロファイルで、散開→人物点群→写真を撮影。再生・SKIP・横overflowなし・pageerror 0を確認。実機スマホの検証とは区別。

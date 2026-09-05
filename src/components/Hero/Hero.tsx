@@ -7,11 +7,12 @@ import s from "../experience.module.css";
 import { HeroEffects } from "@/three/HeroEffects";
 export function Hero() {
   return (
-    <section className={`${s.hero} ${s.quietHero}`} aria-labelledby="hero-heading">
+    <section className={`${s.hero} ${s.quietHero}`} aria-labelledby="hero-heading" data-intro="pending">
       <div className={s.heroAura} aria-hidden="true" />
       <div className={s.heroPhoto} data-hero-photo>
         <Image src="/images/hero.png" alt="風になびくロングレイヤーヘアのモデル" fill priority sizes="(max-width: 700px) 100vw, 68vw" className={s.heroImage} />
       </div>
+      <noscript><style>{'[data-hero-photo] { opacity: 1 !important; animation: none !important; }'}</style></noscript>
       <HeroEffects />
       <div className={s.heroMist} aria-hidden="true" />
       <div className={s.heroTitle}>

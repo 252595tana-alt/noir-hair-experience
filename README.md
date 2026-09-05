@@ -333,7 +333,9 @@ ShaderはReact内の長い文字列にせず `.vert` / `.frag` / `.glsl` を正�
 
 ### Openingと状態の責務
 
-`sessionStorage.noir-opening` で初回HOMEのみFull Opening。0.3秒粒子出現、0.8〜1.8秒頭部形成、2.5秒髪の輪郭、写真のdecode完了後3秒から800msでフェードし、遅い通信でも4.3秒で装飾を取り除きます。HERO画像は最初からpriorityで読み込み、偽の進捗率を表示しません。SKIPは常にDOMボタン。再訪は650ms、reduced-motionは短いフェード。Deep LinkはFull Openingを再生しません。
+`sessionStorage.noir-opening-portrait-v2` で初回HOMEのみ人物形成を再生します。実際のHERO画像から採った点群が0.3〜1.9秒で顔・髪・肩の位置へ収束し、粒子の人物を見せてから2.4〜3.45秒で同じ位置の写真へ移ります。再生時間は描画準備後3.65秒。スマホは700点以下と薄い写真の段階的な重ね合わせで輪郭を補います。右下の↻ボタンで再生可能、SKIPは常にDOMボタンです。Deep Link・reduced-motion・Save-Dataでは省略します。点群とCanvasの準備が1.8秒を超える場合は写真へ退避します。写真のdecodeは点群の開始条件にしません。失敗した準備を再生済みとして記録せず、次の訪問で再試行できます。HEROは最初からpriorityで取得し、JavaScriptが失敗してもCSSの安全な表示へ復帰します。
+
+`pnpm assets:particles` が `public/images/hero.png` から `public/data/hero-particles.json`（6,000点、約207KB / gzip約54KB）を生成します。HERO差し替え時に再生成してください。これは写真に一致する2D点群で、未提供の3D人物モデルを使ったものではありません。再生開始はCanvasの準備完了後に揃え、写真と粒子でobject-fit / object-positionを合わせています。初回の写真表示タイミングを変更したため、以前のLCP計測値は今回の演出の性能保証には使用しません。
 
 `previewStore.ts` は永続化しない比較用ドラフトです。色を試すだけでは selectedColor・料金・URL・予約文を更新しません。APPLYが既存 `setColor` を一度呼び、選択を即時確定します。続く850msの拡大・光・画像置換は演出だけなので、途中でBOOKを押しても最新の選択を取得できます。ANGLEはAPPLYの入力に含めません。STYLE / 確定色の変更時には古い候補を破棄します。確定した状態のlocalStorage保存、Back、RESETはPhase 2の仕組みを維持します。
 
@@ -341,11 +343,11 @@ ShaderはReact内の長い文字列にせず `.vert` / `.frag` / `.glsl` を正�
 
 | Tier | DPR上限 | Opening粒子 | 比較 / STYLE |
 |---|---|---|---|
-| High | 1.5 | 2,000 | full lens / 750ms flow |
-| Medium | 1.25 | 1,000 | noise 40% / 軽いflow。タッチ端末はDOM比較 |
-| Low | 1 | 400 | DOM before/after / GSAP crossfade |
+| High | 1.5 | PC 6,000 | full lens / 750ms flow |
+| Medium | 1.25 | PC 3,000 / Mobile 700 | noise 40% / 軽いflow。タッチ端末はDOM比較 |
+| Low | 1 | PC 1,000 / Mobile 400 | DOM before/after / GSAP crossfade |
 
-Ambientは表の8%だけ（160 / 80 / 32個）。Postprocessing・Bloomは写真の色と軽さを優先して全Tierで省略しています。初期判定はCPU論理コア・画面サイズ・DPR・pointer種別。2コア以下はLow、タッチ端末・8コア未満・大きなpixel budgetはMedium、それ以外はHigh。
+人物形成の完了後はOpening Canvasを破棄します。Postprocessing・Bloomは写真の色と軽さを優先して全Tierで省略しています。初期判定はCPU論理コア・画面サイズ・DPR・pointer種別。2コア以下はLow、タッチ端末・8コア未満・大きなpixel budgetはMedium、それ以外はHigh。
 
 3秒窓×2回、継続的に30FPSを下回ると、まず粒子の描画数を65%へ削減し、次にMediumへShader品質を下げ、最後にLowでレンズを解除します。リロードや選択リセットは行いません。250ms超の休止をFPS判定から除外。毎フレームのVector/Color/Texture生成やReact setStateは行いません。
 
@@ -371,7 +373,7 @@ silver_white → silver、ash_gray → ash、blond → blonde、dark_brown → d
 ### Phase 4で改善する点
 
 1. 実作品ごとに、同一カメラ・照明・位置で撮影した高解像度8方向×使用可能色を用意。現在の提供画像の小ささ・構図差を解消する。
-2. `sampleHead` をGLB頭部のsurface samplingへ置換。髪領域マスクを用意し、レンズ・光・flowを髪だけへ正確に制限する。
+2. TOP人物形成は写真からの点群へ置換済み。今後、本物の3D回転が必要な場合はGLBと髪領域マスクを用意する。
 3. 実機iPhone Safariで長時間操作・メモリ圧迫・タブ復帰を計測する。今回のモバイル検証はChromeのタッチ端末エミュレーションであり、実機Safari確認の代替ではない。
 4. 端末別の実測からFPS閾値・画像解像度・Tier判定を調整。必要になった時だけ圧縮GPU textureや軽いpostprocessingを検討する。
 5. 実際のLINE / 予約API・スタッフ写真・サロン写真・正式な料金へ接続する。
@@ -434,9 +436,9 @@ HairSalon（LocalBusinessのサブタイプ）・必要なPerson・BreadcrumbLis
 
 `ParticleCanvas` / `LensCanvas` / `TransitionCanvas`を独立したdynamic importへ分割しました。BOOKING・STYLIST・MENU・SALONも必要時に読み込み、ナビゲーションのhover / focusで先読みできます。従来の `Scenes.tsx` 一括入口と未使用のdrei依存を削除しました。読み込み中は案内を表示し、画面データの取得失敗時は再読み込みから復旧できます。先読みの失敗は操作を妨げません。
 
-Canvasはdemand方式。レンズはpointer変化・追従中・APPLY中、画像flowは遷移中だけinvalidateします。停止中にフル速度で描画しません。Ambientは30FPS、Openingは最大60FPS。SALON・非表示タブ・画面外では停止します。有限のGSAPだけを使い、cleanupでtweenとlistenerを解除します。カスタムカーソルもタッチ端末では描画しません。
+Canvasはdemand方式。レンズはpointer変化・追従中・APPLY中、画像flowは遷移中だけinvalidateします。停止中にフル速度で描画しません。人物形成中だけ最大60FPS、終了後はCanvasを破棄。SALON・非表示タブ・画面外では停止します。有限のGSAPだけを使い、cleanupでtweenとlistenerを解除します。カスタムカーソルもタッチ端末では描画しません。
 
-モバイルはMedium / Lowから開始し、DPR最大1.25、Opening粒子最大600、Lowは400。postprocessingなし、比較はDOM range。PCは従来の2000 / 1000 / 400粒子プロファイルです。FPS適応は意図的な30FPS制限と負荷による遅延を区別します。
+モバイルはMedium / Lowから開始し、DPR最大1.25、Opening粒子最大700、Lowは400。postprocessingなし、比較はDOM range。PCの人物形成は6000 / 3000 / 1000点です。FPS適応は意図的な30FPS制限と負荷による遅延を区別します。
 
 Textureは最大4件のLRU。current / tryを保護してrecentを再利用し、未使用・上限超過・失敗・アンマウントを処理します。GLSLコンパイル失敗とcontext lossではCanvasだけを破棄してDOMへ移行します。
 
