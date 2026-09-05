@@ -2181,3 +2181,42 @@
     font-size: 11px;
   }
 }
+
+/* Quiet home: a single phrase, open space and light around the hair. */
+.header[data-home="true"] { border-bottom-color: transparent; }
+.header[data-home="true"] .logo span,
+.header[data-home="true"] .headerNote,
+.header[data-home="true"] .tiny,
+.desktopNav[data-home="true"] .tiny { display: none; }
+.quietHero .heroPhoto { left: 18%; right: 10%; top: -6%; bottom: -4%; }
+.quietHero .heroTitle { left: 12%; top: auto; bottom: 24%; }
+.quietHero .heroTitle h1 {
+  font-family: var(--font-dm), sans-serif;
+  font-size: clamp(30px, 4vw, 60px);
+  font-weight: 300;
+  letter-spacing: .18em;
+  line-height: 1.2;
+  margin: 0;
+  text-shadow: 0 0 38px #b2b6ed30;
+}
+.quietHero .heroExplore { margin-top: 24px; gap: 22px; font-size: 9px; letter-spacing: .24em; }
+.quietHero .hero360 { bottom: 12%; right: 22%; }
+.heroAura {
+  position: absolute; inset: 1% 15% 10% 20%; z-index: -3; pointer-events: none;
+  background: radial-gradient(ellipse at 53% 40%, #67608a35, #32475716 43%, transparent 69%);
+}
+.heroMist {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: radial-gradient(ellipse at 66% 91%, #9a8bb514, transparent 41%),
+    radial-gradient(ellipse at 31% 72%, #759cb512, transparent 34%);
+}
+@media (max-width: 700px) {
+  .quietHero .heroPhoto { left: -14%; right: -20%; top: -1%; bottom: 0; }
+  .quietHero .heroTitle { left: 7%; top: auto; bottom: 16%; }
+  .quietHero .heroTitle h1 { font-size: 36px; letter-spacing: .16em; }
+  .quietHero .heroExplore { margin-top: 18px; }
+  .quietHero .hero360 { top: 8%; right: 8%; bottom: auto; }
+  .quietHero .hero360 > span:last-child { display: grid; }
+  .heroAura { inset: 0 -25% 5%; }
+}
+.quietHero .heroPhoto { mix-blend-mode: screen; }

@@ -16,7 +16,7 @@ export function Navigation() {
   const mode = useSiteStore((state) => state.mode);
   return (
     <>
-      <header className={s.header}>
+      <header className={s.header} data-home={mode === "home"}>
         <button
           className={s.logo}
           onClick={() => go("home")}
@@ -40,7 +40,7 @@ export function Navigation() {
           <Arrow direction="up" />
         </button>
       </header>
-      <nav className={s.desktopNav} aria-label="メインナビゲーション">
+      <nav className={s.desktopNav} data-home={mode === "home"} aria-label="メインナビゲーション">
         {items.map((item) => (
           <button
             key={item.mode}
@@ -65,12 +65,13 @@ export function Navigation() {
           <span className={s.tiny}>06</span>BOOK <Arrow />
         </button>
       </nav>
-      <div className={s.worldRail}>
+      {mode !== "home" && <div className={s.worldRail}>
         <span className={s.liveDot} />
         <span>01 / WORLD</span>
         <span className={s.railLine} />
         <button onClick={() => go("concept")}>OUR PHILOSOPHY</button>
-      </div>
+      </div>}
     </>
   );
 }
+
