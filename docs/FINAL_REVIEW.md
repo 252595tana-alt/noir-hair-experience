@@ -40,5 +40,8 @@
 - 既存の選択・角度・TRY / APPLY・担当連携・料金・時間・変更・SALON・Back・Deep Link・RESETを維持。
 - 404維持・通信失敗からの再読み込み復旧・STYLE未選択時の予約文を追加検証。
 - 390 / 430 / 768 / 1024 / 1440 / 1920pxの横はみ出し、JavaScript無効・Save-Data・画像失敗・WebGL context lossを確認。
+- Vercel公開版でも追加検証16件を確認。通信失敗テストはVercelの `static/immutable/chunks` 配信パスに対応して再実行し成功。担当者だけを選ぶ→BOOK→LINE予約文に指名が残ることも公開ブラウザで確認。
+- Chrome / Edge / WebKit Desktop / iPhone WebKit相当 / Android Chrome相当の5環境で主要操作を確認。各7ルートのaxe検査で違反0・通常操作のpageerror 0。実機Safari・Androidでの検証とは区別。
+- `pnpm audit --prod`：検査時点で既知の脆弱性0件。GitHub mainとVercel公開コミットの一致を確認。
 
 公開前の素材・情報差し替えは `.env.example`、`src/config/site.ts`、`src/data/styles.ts`、`src/data/stylists.ts`、`src/data/menu.ts` を使用します。

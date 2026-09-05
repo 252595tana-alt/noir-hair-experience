@@ -179,14 +179,15 @@ test("a failed mode chunk offers recovery without losing the selected plan", asy
   await page.goto("/style/long-wolf");
   await expect(page.getByRole("heading", { name: "WOLF", exact: true })).toBeVisible();
   const requests: string[] = [];
-  await page.route("**/_next/static/chunks/*.js", async route => {
+  const chunks = /\/_next\/static\/(?:immutable\/)?chunks\/[^?]+\.js(?:\?.*)?$/;
+  await page.route(chunks, async route => {
     requests.push(route.request().url());
     await route.abort();
   });
   await page.getByRole("navigation", { name: "メインナビゲーション" }).getByRole("button", { name: /BOOK/ }).click();
   await expect(page.getByRole("heading", { name: "画面を読み込めませんでした" })).toBeVisible();
   expect(requests.length).toBeGreaterThan(0);
-  await page.unroute("**/_next/static/chunks/*.js");
+  await page.unroute(chunks);
   await page.getByRole("button", { name: "再読み込みする" }).click();
   await expect(page.getByTestId("plan-summary")).toContainText("WOLF");
   await expect(page.getByTestId("plan-summary")).toContainText("TAKUYA");
