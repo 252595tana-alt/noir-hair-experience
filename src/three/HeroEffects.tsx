@@ -9,7 +9,7 @@ import { useSiteStore } from "@/store/useSiteStore";
 import { useReducedData } from "@/hooks/useReducedData";
 import type { PortraitSamples, FormationClock } from "./ParticleHead/ParticleHead";
 const ParticleCanvas = dynamic(() => import("./ParticleHead/ParticleCanvas"), { ssr: false });
-const sessionKey = "noir-opening-portrait-v2";
+const sessionKey = "noir-opening-portrait-v3";
 let cachedPortrait: PortraitSamples | undefined;
 
 export function HeroEffects() {
@@ -18,6 +18,7 @@ export function HeroEffects() {
   const [run, setRun] = useState(0);
   const [portrait, setPortrait] = useState<PortraitSamples | null>(null);
   const root = useRef<HTMLDivElement>(null);
+  const halo = useRef<HTMLDivElement>(null);
   const clock = useRef<FormationClock>({ elapsed: 0 });
   const sequence = useRef(0), active = useRef(false), ready = useRef(false);
   const timeline = useRef<gsap.core.Timeline | null>(null);
@@ -26,7 +27,10 @@ export function HeroEffects() {
     const hero = root.current?.closest<HTMLElement>("[data-intro]");
     const photo = hero?.querySelector<HTMLElement>("[data-hero-photo]");
     if (hero) hero.dataset.intro = "rest";
-    if (photo) gsap.set(photo, { opacity: 1 });
+    if (photo) {
+      gsap.set(photo, { clearProps: "filter,transform" });
+      gsap.set(photo, { opacity: 1 });
+    }
   }, []);
   const finish = useCallback(() => {
     active.current = false;
@@ -49,7 +53,7 @@ export function HeroEffects() {
     const hero = root.current?.closest<HTMLElement>("[data-intro]");
     const photo = hero?.querySelector<HTMLElement>("[data-hero-photo]");
     if (hero) hero.dataset.intro = "loading";
-    if (photo) gsap.set(photo, { opacity: .06 });
+    if (photo) gsap.set(photo, { opacity: .035 });
     setPortrait(null);
     setRun(++sequence.current);
     clearTimeout(deadline.current);
@@ -93,18 +97,23 @@ export function HeroEffects() {
     const photo = hero?.querySelector<HTMLElement>("[data-hero-photo]");
     if (!hero || !photo) { finish(); return; }
     hero.dataset.intro = "forming";
-    gsap.set(photo, { opacity: 0 });
+    gsap.set(photo, { opacity: 0, filter: "blur(8px) saturate(.72)", scale: 1.012 });
+    if (halo.current) gsap.set(halo.current, { opacity: 0, scale: .72 });
     const motion = gsap.timeline({ onComplete: finish });
     timeline.current = motion;
     motion.to(clock.current, {
-      elapsed: 3.65, duration: 3.65, ease: "none",
+      elapsed: 3.25, duration: 3.25, ease: "none",
       onUpdate: () => {
         const t = clock.current.elapsed;
-        hero.dataset.intro = t < 1.9 ? "forming" : t < 2.4 ? "portrait" : "revealing";
+        hero.dataset.intro = t < 1.75 ? "forming" : t < 2.15 ? "portrait" : "revealing";
       },
     }, 0);
-    if (usePerformanceTier.getState().mobile) motion.to(photo, { opacity: .16, duration: .6, ease: "power1.inOut" }, 1.65);
-    motion.to(photo, { opacity: 1, duration: 1.05, ease: "power2.inOut" }, 2.4);
+    motion.to(photo, { opacity: usePerformanceTier.getState().mobile ? .13 : .045, duration: .55, ease: "power1.inOut" }, .82);
+    if (halo.current) {
+      motion.to(halo.current, { opacity: .52, scale: 1, duration: 1.05, ease: "power2.out" }, .62);
+      motion.to(halo.current, { opacity: 0, scale: 1.14, duration: 1.05, ease: "power2.in" }, 1.92);
+    }
+    motion.to(photo, { opacity: 1, filter: "blur(0px) saturate(1)", scale: 1, duration: 1.05, ease: "power2.out" }, 2.15);
     motion.paused(document.hidden || useSiteStore.getState().salonOpen);
     deadline.current = setTimeout(finish, 6500);
   }, [finish]);
@@ -138,9 +147,10 @@ export function HeroEffects() {
     <div ref={root} className="hero-effects-anchor" aria-hidden="true" />
     {run > 0 && <>
       <div className="particle-opening" data-testid="particle-opening" aria-hidden="true">
+        <div ref={halo} className="formation-halo" />
         {portrait && <ParticleCanvas key={run} portrait={portrait} clock={clock} onReady={onReady} onFailure={finish} />}
       </div>
-      <button className="opening-skip" onClick={skip}>SKIP INTRO ↗</button>
+      <button className="opening-skip" onClick={skip} aria-label="イントロをスキップ">SKIP</button>
     </>}
     {!run && supported && !reduced && !saveData && <button className="opening-replay" onClick={begin} aria-label="人物形成の演出を再生" title="人物形成の演出を再生">↻</button>}
   </>;

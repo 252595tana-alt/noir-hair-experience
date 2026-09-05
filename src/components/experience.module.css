@@ -2201,6 +2201,14 @@
 }
 .quietHero .heroExplore { margin-top: 24px; gap: 22px; font-size: 9px; letter-spacing: .24em; }
 .quietHero .hero360 { bottom: 12%; right: 22%; }
+.quietHero .heroTitle,
+.quietHero .hero360 { transition: opacity .65s ease, filter .65s ease; }
+.quietHero[data-intro="loading"] .heroTitle { opacity: .55; }
+.quietHero[data-intro="loading"] .hero360 { opacity: .38; }
+.quietHero[data-intro="forming"] .heroTitle { opacity: .27; filter: blur(.35px); }
+.quietHero[data-intro="forming"] .hero360 { opacity: .18; }
+.quietHero[data-intro="portrait"] .heroTitle { opacity: .48; }
+.quietHero[data-intro="portrait"] .hero360 { opacity: .3; }
 .heroAura {
   position: absolute; inset: 1% 15% 10% 20%; z-index: -3; pointer-events: none;
   background: radial-gradient(ellipse at 53% 40%, #67608a35, #32475716 43%, transparent 69%);

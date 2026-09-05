@@ -95,7 +95,7 @@
 
 以前のOpeningは楕円形と簡易的な髪の点群で、写真も最初から表示されており、人物形成として不十分だった。HERO原画像から6,000点の位置・色を採り、散開→人物点群→写真へ変更。粒子と写真のcrop / scaleを同じ計算に揃えた。初回再生に加え、右下の↻で再確認できる。
 
-- WebGL準備ができてから3.65秒の演出を開始。スマホは700点以下。
+- WebGL準備ができてから3.25秒の演出を開始。スマホは700点以下。
 - 点群が欠落・遅延した場合は写真へ復帰し、失敗を再生済みとして保存しない。
 - reduced-motion / Save-Data / WebGL不可では写真と操作を表示。
 - 形成中のcontext loss、SKIP、再生、Deep LinkをPC / Mobile / Tabletで確認。
@@ -104,3 +104,11 @@
 - 修正後の本番ビルドに対する全64ケースは60成功・4対象外。対象外はMobile / Tabletで使用しないGPUレンズ専用テスト。TypeScript strict、ESLint（警告も0件）、本番buildも成功。
 - Chrome PC・Pixel 7相当・iPhone WebKit相当の3プロファイルで、散開→人物点群→写真を撮影。再生・SKIP・横overflowなし・pageerror 0を確認。実機スマホの検証とは区別。
 - Vercel公開版でも同じ3プロファイルで人物形成と再生・SKIPを確認。公開画面の人物点群はPC 6,000点・スマホ相当700点。公開確認スクリプトの粗いポーリングで短い中間状態を取り逃したため、描画フレームごとの監視へ変更して再検証した。
+
+# TOP演出ブラッシュアップ（2026-09-05）
+
+- 初期点群を全画面の均一な散開から、左右の髪先を起点に曲線で流れ込む配置へ変更。青紫から写真色へ移る二層の光点と、輪郭完成時の単発パルスを追加。
+- 点群生成を輪郭・顔・髪優先のLOD順へ変更。6,000点は重複0、先頭700点も重複0、同じHEROからの再生成はbyte単位で一致。
+- 写真は薄いぼけた下絵から解像し、形成中はBE YOU.と360°を静かに表示。SKIPは文字量と面積を減らし、↻の再生操作、reduced-motion、Save-Data、失敗時fallbackは維持。
+- TypeScript strict、ESLint（警告0件）、本番build成功。全64ケースは60成功・4対象外。Chrome PC・Pixel 7相当・iPhone WebKit相当で人物形成、再生、SKIP、横overflowなし、pageerror 0を確認。
+- ローカルChrome各1回のラボ計測はPC LCP 400ms / CLS 0 / 操作event duration最大64ms、Mobile CPU 4倍 LCP 416ms / CLS 0 / 操作event duration最大208ms。JS受信量は433,174 bytes。Mobileの操作目標200msは8ms未達で、フィールドINPや実機保証ではない。

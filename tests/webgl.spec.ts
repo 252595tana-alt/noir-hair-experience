@@ -115,9 +115,9 @@ test("opening is skippable, once per session, and absent on deep links", async (
 }) => {
   await page.goto("/");
   await expect(
-    page.getByRole("button", { name: "SKIP INTRO ↗" }),
+    page.getByRole("button", { name: "イントロをスキップ" }),
   ).toBeVisible();
-  await page.getByRole("button", { name: "SKIP INTRO ↗" }).click();
+  await page.getByRole("button", { name: "イントロをスキップ" }).click();
   await expect(page.getByTestId("particle-opening")).toHaveCount(0);
   await page.reload();
   await page.waitForTimeout(700);
@@ -224,18 +224,19 @@ test("portrait particles form before the photo, and the opening can replay", asy
   await expect(page.getByTestId("particle-opening")).toHaveCount(0);
   await page.getByRole("button", { name: "人物形成の演出を再生" }).click();
   await expect(hero).toHaveAttribute("data-intro", "forming");
-  await page.getByRole("button", { name: "SKIP INTRO ↗" }).click();
+  await page.getByRole("button", { name: "イントロをスキップ" }).click();
   await expect(hero).toHaveAttribute("data-intro", "rest");
   await expect(photo).toHaveCSS("opacity", "1");
   if (info.project.name === "mobile") {
     await page.setViewportSize({ width: 390, height: 664 });
+    const mobileNavBox = await page.getByRole("navigation", { name: "モバイルナビゲーション" }).boundingBox();
     const replay = page.getByRole("button", { name: "人物形成の演出を再生" });
     const replayBox = await replay.boundingBox();
-    expect(replayBox!.y + replayBox!.height).toBeLessThanOrEqual(584);
+    expect(replayBox!.y + replayBox!.height).toBeLessThanOrEqual(mobileNavBox!.y - 8);
     await replay.click();
-    const skip = page.getByRole("button", { name: "SKIP INTRO ↗" });
+    const skip = page.getByRole("button", { name: "イントロをスキップ" });
     const skipBox = await skip.boundingBox();
-    expect(skipBox!.y + skipBox!.height).toBeLessThanOrEqual(584);
+    expect(skipBox!.y + skipBox!.height).toBeLessThanOrEqual(mobileNavBox!.y - 8);
     await skip.click();
   }
 });
@@ -246,7 +247,7 @@ test("missing portrait data reveals the photo and keeps the booking entry availa
   await expect(page.locator("[data-intro]")).toHaveAttribute("data-intro", "rest");
   await expect(page.locator("[data-hero-photo]")).toHaveCSS("opacity", "1");
   await expect(page.getByTestId("particle-opening")).toHaveCount(0);
-  expect(await page.evaluate(() => sessionStorage.getItem("noir-opening-portrait-v2"))).toBeNull();
+  expect(await page.evaluate(() => sessionStorage.getItem("noir-opening-portrait-v3"))).toBeNull();
   await page.getByRole("button", { name: "EXPLORE YOUR STYLE" }).click();
   await expect(page.locator("main")).toHaveAttribute("data-mode", "style");
 });

@@ -222,7 +222,7 @@ dialog {
 .particle-opening {
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, #05050555, transparent);
+  background: transparent;
   pointer-events: none;
   z-index: 1;
 }
@@ -231,12 +231,19 @@ dialog {
   right: 6%;
   bottom: 8%;
   z-index: 3;
-  border: 1px solid #ffffff70;
-  padding: 12px 20px;
-  background: #050505b0;
-  font-size: 10px;
-  letter-spacing: 0.16em;
+  border: 0;
+  border-bottom: 1px solid #ffffff55;
+  padding: 9px 2px;
+  min-width: 52px;
+  min-height: 44px;
+  background: transparent;
+  color: #f5f5f2;
+  opacity: .62;
+  font-size: 8px;
+  letter-spacing: 0.22em;
+  transition: opacity .3s, border-color .3s;
 }
+.opening-skip:hover { opacity: 1; border-color: #ffffffcc; }
 .hair-cursor {
   position: fixed;
   left: 0;
@@ -290,17 +297,24 @@ button:disabled {
 [data-intro="pending"] [data-hero-photo] { animation: hero-photo-safety 1.8s step-end forwards; }
 @keyframes hero-photo-safety { from { opacity: .06; } to { opacity: 1; } }
 .hero-effects-anchor { display: none; }
-.particle-opening { background: transparent; }
+.formation-halo {
+  position: absolute; inset: -12%; z-index: 0; pointer-events: none;
+  background: radial-gradient(ellipse at 57% 43%, #98a7ff2b 0%, #6566a31d 22%, transparent 58%);
+  mix-blend-mode: screen; will-change: transform, opacity;
+}
+.particle-opening .webgl-layer { z-index: 1; }
 .opening-replay {
   position: absolute; right: 6%; bottom: 8%; z-index: 3;
-  width: 44px; height: 44px; border: 1px solid #ffffff45; border-radius: 50%;
-  font-size: 22px; color: #dadce8; background: #05050545;
+  width: 44px; height: 44px; border: 1px solid #ffffff38; border-radius: 50%;
+  font-size: 19px; color: #dadce8; background: #05050530; opacity: .68;
+  transition: transform .65s cubic-bezier(.2,.8,.2,1), opacity .3s, border-color .3s;
 }
-.opening-replay:hover { background: #ffffff16; border-color: #ffffff90; }
+.opening-replay:hover { transform: rotate(-180deg); opacity: 1; border-color: #ffffff90; }
 @media (max-width: 700px) {
   /* Keep controls above the 64px bottom nav when the 590px hero exceeds the viewport (header: 87px). */
   .opening-skip, .opening-replay { bottom: max(8%, calc(100% + 167px + env(safe-area-inset-bottom) - 100svh)); }
 }
 @media (prefers-reduced-motion: reduce) {
   [data-intro="pending"] [data-hero-photo] { animation: none; opacity: 1; }
+  .opening-replay { transition: opacity .3s, border-color .3s; }
 }

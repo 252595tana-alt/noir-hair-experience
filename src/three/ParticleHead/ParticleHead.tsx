@@ -1,7 +1,7 @@
 "use client";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, type RefObject } from "react";
-import { BufferGeometry, Float32BufferAttribute, Color, SRGBColorSpace, Vector4, type ShaderMaterial } from "three";
+import { AdditiveBlending, BufferGeometry, Float32BufferAttribute, Color, SRGBColorSpace, Vector4, type ShaderMaterial } from "three";
 import { particleVertex, particleFragment } from "../shaders.generated";
 import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 
@@ -15,8 +15,10 @@ export function portraitGeometry(data: PortraitSamples, count: number) {
   for (let i = 0; i < count; i++) {
     const j = i * 5;
     target.set([data.points[j], data.points[j + 1], random()], i * 3);
-    const angle = random() * Math.PI * 2, radius = .3 + random() * 1.5;
-    scattered.set([Math.cos(angle) * radius, Math.sin(angle) * radius, random()], i * 3);
+    const direction = random() < .82 ? 1 : -1;
+    const distance = .95 + random() * .8;
+    const startY = 1 - data.points[j + 1] * 2 + (random() - .5) * (.3 + distance * .22);
+    scattered.set([direction * distance, startY, random()], i * 3);
     color.setRGB(data.points[j + 2], data.points[j + 3], data.points[j + 4], SRGBColorSpace);
     colors.set([color.r, color.g, color.b], i * 3);
   }
@@ -42,7 +44,7 @@ export function ParticleHead({ portrait, clock, onReady }: {
   const fit = useRef({ rect: new Vector4(0, 0, 1, 1), dpr: 1 });
   const uniforms = useMemo(() => ({
     uTime: { value: 0 }, uProgress: { value: 0 }, uOpacity: { value: 0 },
-    uDpr: { value: 1 }, uPointSize: { value: mobile ? 5.2 : 3.6 },
+    uDpr: { value: 1 }, uPointSize: { value: mobile ? 5 : 3.5 },
     uImageRect: { value: new Vector4(0, 0, 1, 1) },
   }), [mobile]);
   useEffect(() => () => geometry.dispose(), [geometry]);
@@ -82,10 +84,10 @@ export function ParticleHead({ portrait, clock, onReady }: {
     current.uDpr.value = fit.current.dpr;
     const t = clock.current.elapsed;
     current.uTime.value = t;
-    current.uProgress.value = Math.min(1, Math.max(0, (t - .3) / 1.6));
-    current.uOpacity.value = Math.min(1, t / .25) * (1 - Math.min(1, Math.max(0, (t - 2.6) / .85)));
+    current.uProgress.value = Math.min(1, Math.max(0, (t - .25) / 1.5));
+    current.uOpacity.value = Math.min(1, t / .22) * (1 - Math.min(1, Math.max(0, (t - 2.3) / .72)));
   });
   return <points geometry={geometry} frustumCulled={false}>
-    <shaderMaterial ref={material} uniforms={uniforms} vertexShader={particleVertex} fragmentShader={particleFragment} transparent depthWrite={false} depthTest={false} />
+    <shaderMaterial ref={material} uniforms={uniforms} vertexShader={particleVertex} fragmentShader={particleFragment} transparent blending={AdditiveBlending} depthWrite={false} depthTest={false} />
   </points>;
 }

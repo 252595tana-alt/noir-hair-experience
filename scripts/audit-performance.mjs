@@ -57,7 +57,7 @@ for (const mobile of [false, true]) {
     device: mobile ? "390px / CPU4x" : "1440px",
     ...metrics,
     jsBytes: metrics.resources
-      .filter((r) => r.name.includes(".js"))
+      .filter((r) => new URL(r.name).pathname.endsWith(".js"))
       .reduce((s, r) => s + r.bytes, 0),
   });
   await page.close();

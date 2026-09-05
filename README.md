@@ -333,7 +333,7 @@ ShaderはReact内の長い文字列にせず `.vert` / `.frag` / `.glsl` を正�
 
 ### Openingと状態の責務
 
-`sessionStorage.noir-opening-portrait-v2` で初回HOMEのみ人物形成を再生します。実際のHERO画像から採った点群が0.3〜1.9秒で顔・髪・肩の位置へ収束し、粒子の人物を見せてから2.4〜3.45秒で同じ位置の写真へ移ります。再生時間は描画準備後3.65秒。スマホは700点以下と薄い写真の段階的な重ね合わせで輪郭を補います。右下の↻ボタンで再生可能、SKIPは常にDOMボタンです。Deep Link・reduced-motion・Save-Dataでは省略します。点群とCanvasの準備が1.8秒を超える場合は写真へ退避します。写真のdecodeは点群の開始条件にしません。失敗した準備を再生済みとして記録せず、次の訪問で再試行できます。HEROは最初からpriorityで取得し、JavaScriptが失敗してもCSSの安全な表示へ復帰します。
+`sessionStorage.noir-opening-portrait-v3` で初回HOMEのみ人物形成を再生します。実際のHERO画像から輪郭・顔・髪を優先して採った点群が、左右の髪先から曲線を描いて1.75秒までに人物へ収束します。輪郭の発光を挟み、2.15〜3.2秒でぼけた下絵から同じ位置の写真へ移ります。再生時間は描画準備後3.25秒。スマホは700点以下でも人物を読めるLOD順と薄い写真の段階的な重ね合わせを使います。右下の↻ボタンで再生可能、SKIPは常にDOMボタンです。Deep Link・reduced-motion・Save-Dataでは省略します。点群とCanvasの準備が1.8秒を超える場合は写真へ退避します。写真のdecodeは点群の開始条件にしません。失敗した準備を再生済みとして記録せず、次の訪問で再試行できます。HEROは最初からpriorityで取得し、JavaScriptが失敗してもCSSの安全な表示へ復帰します。
 
 `pnpm assets:particles` が `public/images/hero.png` から `public/data/hero-particles.json`（6,000点、約207KB / gzip約54KB）を生成します。HERO差し替え時に再生成してください。これは写真に一致する2D点群で、未提供の3D人物モデルを使ったものではありません。再生開始はCanvasの準備完了後に揃え、写真と粒子でobject-fit / object-positionを合わせています。初回の写真表示タイミングを変更したため、以前のLCP計測値は今回の演出の性能保証には使用しません。
 
