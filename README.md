@@ -32,7 +32,7 @@ Google Driveなどシンボリックリンクに制限がある場所でも利�
 
 ## 実装した体験
 
-- HERO：専用に生成したモデル写真、大きなコピー、スタイル探索と360°への導線。
+- HERO：モデル写真と淡い光、短い「BE YOU.」のコピー、スタイル探索と360°への導線。
 - STYLE：8スタイル、矢印・左右スワイプ・矢印キー、GSAPによる切替。
 - 360°：8方向のWebPシーケンス。48px移動ごとに1角度、四捨五入でスナップ、両端をループ。マウス・タッチ・キーボードに対応。
 - COLOR：8色。候補をTRYで比較し、APPLYで `selectedColor` と料金を更新。`selectedAngle` は維持。
@@ -380,7 +380,7 @@ silver_white → silver、ash_gray → ash、blond → blonde、dark_brown → d
 
 ### 現在の公開状態
 
-公開先へのデプロイは行っていません。実店舗の名称・URL・住所・電話・予約URLは未設定です。`indexable` の条件を満たすまでrobotsはnoindex / Disallow、sitemapは空、HairSalon / PersonのJSON-LDは出力しません。仮住所・仮電話をサロン画面から除去し、未設定項目は準備中と表示します。BreadcrumbListは各ページに出力します。
+GitHubとVercelへ公開済みです。公開URLを設定し、デモサロン名はNŌIRとしています。実店舗の住所・電話・予約URLは未設定です。`indexable` の条件を満たすまでrobotsはnoindex / Disallow、sitemapは空、HairSalon / PersonのJSON-LDは出力しません。未設定項目は準備中と表示します。BreadcrumbListは各ページに出力します。実店舗運用に向けた残件は [最終確認・未完了項目](docs/FINAL_REVIEW.md) を参照してください。
 
 ### 環境変数・店舗情報
 
@@ -432,7 +432,7 @@ HairSalon（LocalBusinessのサブタイプ）・必要なPerson・BreadcrumbLis
 
 ### 性能・描画・安定性
 
-`ParticleCanvas` / `LensCanvas` / `TransitionCanvas`を独立したdynamic importへ分割しました。BOOKING・STYLIST・MENU・SALONも必要時に読み込み、ナビゲーションのhover / focusで先読みできます。従来の `Scenes.tsx` 一括入口は使用しません。dreiのPreloadと事前のシーン全体コンパイルも除去しました。
+`ParticleCanvas` / `LensCanvas` / `TransitionCanvas`を独立したdynamic importへ分割しました。BOOKING・STYLIST・MENU・SALONも必要時に読み込み、ナビゲーションのhover / focusで先読みできます。従来の `Scenes.tsx` 一括入口と未使用のdrei依存を削除しました。読み込み中は案内を表示し、画面データの取得失敗時は再読み込みから復旧できます。先読みの失敗は操作を妨げません。
 
 Canvasはdemand方式。レンズはpointer変化・追従中・APPLY中、画像flowは遷移中だけinvalidateします。停止中にフル速度で描画しません。Ambientは30FPS、Openingは最大60FPS。SALON・非表示タブ・画面外では停止します。有限のGSAPだけを使い、cleanupでtweenとlistenerを解除します。カスタムカーソルもタッチ端末では描画しません。
 

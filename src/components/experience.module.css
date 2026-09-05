@@ -2220,3 +2220,8 @@
   .heroAura { inset: 0 -25% 5%; }
 }
 .quietHero .heroPhoto { mix-blend-mode: screen; }
+
+.modeNotice { min-height: 45svh; display: grid; align-content: center; gap: 20px; }
+.modeNotice h1 { font-size: clamp(20px, 3vw, 32px); font-weight: 400; }
+.modeNotice p { color: var(--muted); font-size: 13px; line-height: 1.8; }
+.modeNotice button { justify-self: start; }

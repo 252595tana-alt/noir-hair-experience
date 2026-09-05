@@ -159,3 +159,35 @@ test("responsive widths, reduced data, image formats, and idle WebGL", async ({
       .evaluate((image) => (image as HTMLImageElement).currentSrc),
   ).toMatch(/\.(avif|webp|jpg)$/);
 });
+
+test("extra URL segments keep the 404 after hydration and do not alter selection", async ({ page }) => {
+  await page.goto("/style/bob");
+  await expect(page.getByRole("heading", { name: "BOB", exact: true })).toBeVisible();
+  const saved = () => page.evaluate(() => localStorage.getItem("noir-selection-v2"));
+  const before = await saved();
+  for (const path of ["/style/long-wolf/extra", "/stylist/takuya/extra"]) {
+    const response = await page.goto(path);
+    expect(response?.status()).toBe(404);
+    // Keep the assertion past the hydration that previously replaced the 404.
+    await page.waitForTimeout(800);
+    await expect(page.getByRole("heading", { name: "404 / NOT FOUND" })).toBeVisible();
+    expect(await saved()).toBe(before);
+  }
+});
+
+test("a failed mode chunk offers recovery without losing the selected plan", async ({ page }) => {
+  await page.goto("/style/long-wolf");
+  await expect(page.getByRole("heading", { name: "WOLF", exact: true })).toBeVisible();
+  const requests: string[] = [];
+  await page.route("**/_next/static/chunks/*.js", async route => {
+    requests.push(route.request().url());
+    await route.abort();
+  });
+  await page.getByRole("navigation", { name: "メインナビゲーション" }).getByRole("button", { name: /BOOK/ }).click();
+  await expect(page.getByRole("heading", { name: "画面を読み込めませんでした" })).toBeVisible();
+  expect(requests.length).toBeGreaterThan(0);
+  await page.unroute("**/_next/static/chunks/*.js");
+  await page.getByRole("button", { name: "再読み込みする" }).click();
+  await expect(page.getByTestId("plan-summary")).toContainText("WOLF");
+  await expect(page.getByTestId("plan-summary")).toContainText("TAKUYA");
+});

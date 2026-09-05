@@ -10,21 +10,28 @@ export function createBookingMessage(
     | "selectedColor"
     | "selectedStylistId"
     | "selectedMenus"
+    | "colorChosen"
     | "consultation"
   >,
 ): string {
   const style = styleById(state.selectedStyleId);
-  if (state.consultation || !style) return "スタイルについて相談希望です。";
+  if (state.consultation) return "スタイルについて相談希望です。";
   const stylist = stylistById(state.selectedStylistId);
   const selected = menus.filter((menu) =>
     state.selectedMenus.includes(menu.id),
   );
   return [
-    style.name + "のスタイルで、",
-    colorById(state.selectedColor).name + "カラーを希望しています。",
-    stylist
-      ? stylist.name + "さんを指名希望です。"
-      : "スタイリストの指名はありません。",
+    style
+      ? style.name + "のスタイルで、"
+      : "スタイルについて相談希望です。",
+    ...(style || state.colorChosen
+      ? [colorById(state.selectedColor).name + "カラーを希望しています。"]
+      : []),
+    ...(stylist
+      ? [stylist.name + "さんを指名希望です。"]
+      : style
+        ? ["スタイリストの指名はありません。"]
+        : []),
     ...(selected.length
       ? ["", "希望メニュー：", selected.map((menu) => menu.name).join(" / ")]
       : []),

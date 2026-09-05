@@ -10,10 +10,11 @@ export const loadSalon = () => import("@/components/SalonOverlay/SalonOverlay");
 export const loadMenu = () => import("@/components/MenuPlan/MenuPlan");
 export function prefetchMode(mode: SiteMode | "salon") {
   if (reducedData()) return;
-  if (mode === "booking") void loadBooking();
-  else if (mode === "stylist") void loadStylist();
-  else if (mode === "salon") void loadSalon();
-  else if (mode === "menu") void loadMenu();
+  // A failed prediction must never become an unhandled rejection.
+  if (mode === "booking") void loadBooking().catch(() => {});
+  else if (mode === "stylist") void loadStylist().catch(() => {});
+  else if (mode === "salon") void loadSalon().catch(() => {});
+  else if (mode === "menu") void loadMenu().catch(() => {});
   else if (mode === "style" || mode === "color") {
     const s = useSiteStore.getState();
     const style = styles.find((x) => x.id === s.selectedStyleId) ?? styles[0];

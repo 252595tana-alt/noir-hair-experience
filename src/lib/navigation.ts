@@ -4,6 +4,7 @@ import { styles, styleById, styleBySlug } from "@/data/styles";
 import { stylists, stylistById } from "@/data/stylists";
 import { isHairColor } from "./selection";
 import { routes, modeFromPath, type SiteMode } from "./constants";
+import { pageInfo } from "./seo";
 const locationPath = () => window.location.pathname + window.location.search;
 export function selectionPath(mode: SiteMode): string {
   const state = useSiteStore.getState();
@@ -21,6 +22,7 @@ export function selectionPath(mode: SiteMode): string {
 }
 export function syncSelectionUrl() {
   const path = window.location.pathname;
+  if (!pageInfo(path).found) return;
   if (
     path === "/color" ||
     path === "/style" ||
@@ -48,6 +50,7 @@ export function go(mode: SiteMode, path?: string) {
 export function initializeFromUrl() {
   const url = new URL(window.location.href);
   const path = url.pathname;
+  if (!pageInfo(path).found) return;
   const state = useSiteStore.getState();
   const style = path.startsWith("/style/")
     ? styleBySlug(path.split("/")[2])
@@ -72,6 +75,7 @@ export function initializeFromUrl() {
 }
 export function applyLocationMode() {
   const path = window.location.pathname;
+  if (!pageInfo(path).found) return;
   if (path === "/salon") {
     useSiteStore.getState().setSalonOpen(true);
     return;

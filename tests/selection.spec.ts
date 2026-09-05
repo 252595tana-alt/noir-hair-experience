@@ -79,6 +79,36 @@ test("data relationships and booking message remain internally consistent", () =
 import { sampleFps } from "../src/three/Performance/fps";
 import { usePerformanceTier } from "../src/hooks/usePerformanceTier";
 
+test("booking a stylist without choosing a style retains the nomination", () => {
+  useSiteStore.getState().setStylist("takuya");
+  expect(createBookingMessage(useSiteStore.getState())).toBe(
+    "スタイルについて相談希望です。\nTAKUYAさんを指名希望です。",
+  );
+});
+
+test("booking a menu without choosing a style retains only the selected services", () => {
+  useSiteStore.getState().toggleMenu("treatment");
+  expect(createBookingMessage(useSiteStore.getState())).toBe(
+    "スタイルについて相談希望です。\n\n希望メニュー：\nTREATMENT",
+  );
+});
+
+test("style-free booking preserves an explicitly chosen default color and consultation remains opt-in", () => {
+  const state = useSiteStore.getState();
+  state.setColor("black");
+  state.setStylist("yuki");
+  state.toggleMenu("head-spa");
+  expect(createBookingMessage(useSiteStore.getState())).toBe(
+    "スタイルについて相談希望です。\nBLACKカラーを希望しています。\nYUKIさんを指名希望です。\n\n希望メニュー：\nCOLOR / HEAD SPA",
+  );
+  state.setConsultation(true);
+  expect(createBookingMessage(useSiteStore.getState())).toBe(
+    "スタイルについて相談希望です。",
+  );
+  state.setConsultation(false);
+  expect(createBookingMessage(useSiteStore.getState())).toContain("YUKIさん");
+});
+
 test("sustained FPS degradation reduces geometry before shaders and lens", () => {
   const sample = { elapsed: 0, frames: 0, slow: 0 };
   let drops = 0;

@@ -4,10 +4,10 @@ import { styleBySlug } from "@/data/styles";
 import { stylists, stylistById } from "@/data/stylists";
 export function pageInfo(path: string) {
   const clean = path.split("?")[0];
-  const style = clean.startsWith("/style/")
+  const style = /^\/style\/[^/]+$/.test(clean)
     ? styleBySlug(clean.split("/")[2])
     : undefined;
-  const person = clean.startsWith("/stylist/")
+  const person = /^\/stylist\/[^/]+$/.test(clean)
     ? stylists.find((s) => s.slug === clean.split("/")[2])
     : undefined;
   const names: Record<string, string> = {
@@ -31,6 +31,7 @@ export function pageInfo(path: string) {
       ? `${person.name}の得意分野：${person.specialties.join("・")}。担当スタイルを見て、指名・予約を相談できます。`
       : `${site.name}の${label}。スタイル・カラー・担当者・料金を確認し、自分らしい髪を相談できます。`;
   return {
+    found: Boolean(style || person || names[clean]),
     path: clean,
     title: `${label} | ${site.name}`,
     description,
@@ -48,7 +49,7 @@ export function metadataFor(path: string): Metadata {
     description: info.description,
     alternates: { canonical: absoluteUrl(info.path) },
     robots: {
-      index: indexable && !["/booking", "/color"].includes(info.path),
+      index: indexable && info.found && !["/booking", "/color"].includes(info.path),
       follow: indexable,
     },
     openGraph: {

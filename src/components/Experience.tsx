@@ -15,18 +15,26 @@ import { MobileNavigation } from "./MobileNavigation/MobileNavigation";
 import { Hero } from "./Hero/Hero";
 import { Concept } from "./Hero/Concept";
 import { StyleExperience } from "./StyleExperience/StyleExperience";
+import { ModeBoundary, ModeLoading, SalonLoading } from "./ui/ModeBoundary";
 import {
   loadBooking,
   loadMenu,
   loadSalon,
   loadStylist,
 } from "@/lib/modeModules";
-const StylistExperience = dynamic(() =>
-  loadStylist().then((m) => m.StylistExperience),
+const StylistExperience = dynamic(
+  () => loadStylist().then((m) => m.StylistExperience),
+  { loading: () => <ModeLoading label="STYLIST" /> },
 );
-const MenuPlan = dynamic(() => loadMenu().then((m) => m.MenuPlan));
-const Booking = dynamic(() => loadBooking().then((m) => m.Booking));
-const SalonOverlay = dynamic(() => loadSalon().then((m) => m.SalonOverlay));
+const MenuPlan = dynamic(() => loadMenu().then((m) => m.MenuPlan), {
+  loading: () => <ModeLoading label="MENU" />,
+});
+const Booking = dynamic(() => loadBooking().then((m) => m.Booking), {
+  loading: () => <ModeLoading label="BOOK" />,
+});
+const SalonOverlay = dynamic(() => loadSalon().then((m) => m.SalonOverlay), {
+  loading: SalonLoading,
+});
 import { RouteMetadata } from "./RouteMetadata";
 import { subscribeSelectionAnalytics } from "@/lib/selectionAnalytics";
 import { site } from "@/config/site";
@@ -77,7 +85,7 @@ export default function Experience({ children }: { children: ReactNode }) {
   useEffect(() => {
     applyLocationMode();
   }, [pathname]);
-  if (pageInfo(pathname).label === "ページが見つかりません") return children;
+  if (!pageInfo(pathname).found) return children;
   return (
     <div
       className={s.shell}
@@ -100,7 +108,7 @@ export default function Experience({ children }: { children: ReactNode }) {
         {!ready && pathname !== "/" ? (
           children
         ) : (
-          <>
+          <ModeBoundary key={mode}>
             {mode === "home" && <Hero />}
             {mode === "concept" && <Concept />}
             {mode === "style" && <StyleExperience />}
@@ -108,7 +116,7 @@ export default function Experience({ children }: { children: ReactNode }) {
             {mode === "stylist" && <StylistExperience />}
             {mode === "menu" && <MenuPlan />}
             {mode === "booking" && <Booking />}
-          </>
+          </ModeBoundary>
         )}
       </main>
       {mode !== "home" && (
@@ -133,7 +141,7 @@ export default function Experience({ children }: { children: ReactNode }) {
         </footer>
       )}
       <MobileNavigation />
-      {salonOpen && <SalonOverlay />}
+      {salonOpen && <ModeBoundary isSalon><SalonOverlay /></ModeBoundary>}
     </div>
   );
 }
