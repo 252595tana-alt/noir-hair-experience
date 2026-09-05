@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 
 // This samples the existing photograph; it never modifies the image itself.
 // Coordinates use the original image's top-left origin, before object-fit cropping.
-const source = new URL("../public/images/hero.png", import.meta.url);
+const source = new URL("../public/images/hero-360/front-v2.webp", import.meta.url);
 const destination = new URL("../public/data/hero-particles.json", import.meta.url);
 const input = await readFile(source);
 const metadata = await sharp(input).metadata();

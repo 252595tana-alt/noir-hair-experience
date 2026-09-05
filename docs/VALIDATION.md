@@ -112,3 +112,14 @@
 - 写真は薄いぼけた下絵から解像し、形成中はBE YOU.と360°を静かに表示。SKIPは文字量と面積を減らし、↻の再生操作、reduced-motion、Save-Data、失敗時fallbackは維持。
 - TypeScript strict、ESLint（警告0件）、本番build成功。全64ケースは60成功・4対象外。Chrome PC・Pixel 7相当・iPhone WebKit相当で人物形成、再生、SKIP、横overflowなし、pageerror 0を確認。
 - ローカルChrome各1回のラボ計測はPC LCP 400ms / CLS 0 / 操作event duration最大64ms、Mobile CPU 4倍 LCP 416ms / CLS 0 / 操作event duration最大208ms。JS受信量は433,174 bytes。Mobileの操作目標200msは8ms未達で、フィールドINPや実機保証ではない。
+
+# TOP 360°ターンテーブル（2026-09-05）
+
+- 既存HEROを参照して同一の成人女性モデル、髪型、衣装、照明による8方向画像を内蔵image_genで作成。初稿の左右斜め後ろの順序を直し、不足した左斜め前を再生成。4列×2行のspriteを1776×888へ正規化し、AVIF 79,004 bytes / WebP 165,520 bytesで配置。
+- TOPの人物領域を直接ドラッグ／スワイプ可能。隣接角度をクロスフェードし、リリース時に短い慣性を加えて45°単位へスナップ。左右キー、Homeキー、360°ボタンでも操作可能。
+- `selectedAngle` を共通Storeへ保存し、TOPで選んだ角度をSTYLE / COLORの360°ビューへ引き継ぐ。SALON、HOME再訪、再読み込みでも既存の永続化仕様を維持。
+- スマホは横方向を判定してからpointer captureし、縦スワイプでは角度を変えない。role=slider、角度名、aria値、focus-visibleを設定。
+- Opening点群を新しい正面フレームから再生成。PC / Mobileの形成中と完成時を目視し、正面写真と粒子の位置が一致することを確認。
+- Chrome 1440×1000、Pixel 7相当、Tablet 820×1180でドラッグ／タッチ／キー／縦スクロール／STYLE引き継ぎを確認。横overflow・pageerrorは0。
+- TypeScript strict、ESLint警告0、本番build成功。全67ケースは63成功・4対象外。
+- ローカルChrome 1回のラボ計測はPC LCP 524ms / CLS 0 / 操作event duration最大64ms、Mobile CPU 4倍 LCP 676ms / CLS 0 / 操作event duration最大240ms。JS受信量434,270 bytes。Mobile値は目標200msを超えるため、公開後の実機field INP確認が必要。

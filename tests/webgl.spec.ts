@@ -247,7 +247,7 @@ test("missing portrait data reveals the photo and keeps the booking entry availa
   await expect(page.locator("[data-intro]")).toHaveAttribute("data-intro", "rest");
   await expect(page.locator("[data-hero-photo]")).toHaveCSS("opacity", "1");
   await expect(page.getByTestId("particle-opening")).toHaveCount(0);
-  expect(await page.evaluate(() => sessionStorage.getItem("noir-opening-portrait-v3"))).toBeNull();
+  expect(await page.evaluate(() => sessionStorage.getItem("noir-opening-portrait-v4"))).toBeNull();
   await page.getByRole("button", { name: "EXPLORE YOUR STYLE" }).click();
   await expect(page.locator("main")).toHaveAttribute("data-mode", "style");
 });

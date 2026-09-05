@@ -276,6 +276,73 @@ test("empty consultation, generated text and resetting optional-only plans", asy
   ).toHaveValue("スタイルについて相談希望です。");
 });
 
+test("TOP portrait rotates by drag, swipe and keyboard and carries its angle into STYLE", async ({
+  page,
+}, info) => {
+  await page.goto("/");
+  const hero = page.locator("[data-intro]");
+  const skip = page.getByRole("button", { name: "イントロをスキップ" });
+  const turntable = page.getByTestId("hero-turntable");
+  const rotateButton = page.getByRole("button", { name: "人物を次の角度へ45度回転" });
+  await expect(turntable).toHaveAttribute("aria-disabled", "true");
+  await expect(rotateButton).toBeDisabled();
+  await expect.poll(async () =>
+    (await skip.isVisible()) || (await hero.getAttribute("data-intro")) === "rest",
+  ).toBe(true);
+  if (await skip.isVisible()) await skip.click();
+  await expect(hero).toHaveAttribute("data-intro", "rest");
+  await expect(turntable).toHaveAttribute("role", "slider");
+  await expect(turntable).toHaveAttribute("aria-disabled", "false");
+  await expect(rotateButton).toBeEnabled();
+  await expect(turntable).toHaveAttribute("data-angle", "0");
+
+  await turntable.focus();
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("ArrowRight");
+  await expect(turntable).toHaveAttribute("data-angle", "2");
+  await expect(turntable).toHaveAttribute("data-rotating", "false");
+  await expect(turntable).toHaveAttribute("data-visual-angle", "2");
+  await page.keyboard.press("ArrowLeft");
+  await expect(turntable).toHaveAttribute("data-angle", "1");
+  await page.keyboard.press("Home");
+  await expect(turntable).toHaveAttribute("data-angle", "0");
+  await expect(turntable).toHaveAttribute("data-rotating", "false");
+  await rotateButton.click();
+  await rotateButton.click();
+  await expect(turntable).toHaveAttribute("data-angle", "2");
+  await expect(turntable).toHaveAttribute("data-rotating", "false");
+  await expect(turntable).toHaveAttribute("data-visual-angle", "2");
+  await turntable.focus();
+  await page.keyboard.press("Home");
+  await expect(turntable).toHaveAttribute("data-rotating", "false");
+
+  if (info.project.name !== "desktop") {
+    await swipe(page, '[data-testid="hero-turntable"]', 4, 90);
+    await expect(turntable).toHaveAttribute("data-angle", "0");
+    await swipe(page, '[data-testid="hero-turntable"]', -105);
+  } else {
+    const box = (await turntable.boundingBox())!;
+    await page.mouse.move(box.x + box.width * .62, box.y + box.height * .48);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * .62 - 105, box.y + box.height * .48, { steps: 10 });
+    await page.mouse.up();
+  }
+  await expect.poll(async () => Number(await turntable.getAttribute("data-angle"))).not.toBe(0);
+  const angle = Number(await turntable.getAttribute("data-angle"));
+  expect((await saved(page)).selectedAngle).toBe(angle);
+
+  await page.getByRole("button", { name: "人物形成の演出を再生" }).click();
+  await expect(turntable).toHaveAttribute("aria-disabled", "true");
+  await expect(turntable).toHaveAttribute("data-visual-angle", "0");
+  await page.getByRole("button", { name: "イントロをスキップ" }).click();
+  await expect(turntable).toHaveAttribute("data-rotating", "false");
+  await expect(turntable).toHaveAttribute("data-visual-angle", String(angle));
+
+  await page.getByRole("button", { name: "EXPLORE YOUR STYLE" }).click();
+  await page.getByRole("button", { name: "360° VIEW" }).click();
+  await expect(page.getByTestId("angle-index")).toHaveText(String(angle + 1).padStart(2, "0"));
+});
+
 test("Phase 1 hero, drag and swipe, all angles and color loading remain intact", async ({
   page,
 }, info) => {

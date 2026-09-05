@@ -9,7 +9,7 @@ import { useSiteStore } from "@/store/useSiteStore";
 import { useReducedData } from "@/hooks/useReducedData";
 import type { PortraitSamples, FormationClock } from "./ParticleHead/ParticleHead";
 const ParticleCanvas = dynamic(() => import("./ParticleHead/ParticleCanvas"), { ssr: false });
-const sessionKey = "noir-opening-portrait-v3";
+const sessionKey = "noir-opening-portrait-v4";
 let cachedPortrait: PortraitSamples | undefined;
 
 export function HeroEffects() {
@@ -137,6 +137,7 @@ export function HeroEffects() {
     const x = gsap.quickTo(photo, "x", { duration: .8 }), y = gsap.quickTo(photo, "y", { duration: .8 });
     const move = (event: PointerEvent) => {
       if (document.hidden) return;
+      if (photo.querySelector('[data-rotating="true"]')) return;
       x((event.clientX / innerWidth - .5) * 16);
       y((event.clientY / innerHeight - .5) * 12);
     };

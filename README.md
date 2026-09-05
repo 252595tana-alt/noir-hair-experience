@@ -32,9 +32,9 @@ Google Driveなどシンボリックリンクに制限がある場所でも利�
 
 ## 実装した体験
 
-- HERO：モデル写真と淡い光、短い「BE YOU.」のコピー、スタイル探索と360°への導線。
+- HERO：同一モデルの8方向ターンテーブル、粒子形成、淡い光、短い「BE YOU.」のコピー。人物を直接ドラッグ／スワイプして回転可能。
 - STYLE：8スタイル、矢印・左右スワイプ・矢印キー、GSAPによる切替。
-- 360°：8方向のWebPシーケンス。48px移動ごとに1角度、四捨五入でスナップ、両端をループ。マウス・タッチ・キーボードに対応。
+- 360°：TOPとSTYLEのどちらも8方向。TOPは隣接フレームを混ぜて滑らかに表示し、リリース時は短い慣性で45°単位へスナップ。マウス・タッチ・左右キー・Homeキーに対応し、角度を共通stateへ保持。
 - COLOR：8色。候補をTRYで比較し、APPLYで `selectedColor` と料金を更新。`selectedAngle` は維持。
 - STYLIST：3名、得意分野、担当スタイル、指名予約。未設定のInstagramは準備中表示。
 - MENU：6メニュー。スタイル・カラーのおすすめ施術とOPTIONを分け、料金・時間・指名料を自動計算。
@@ -67,6 +67,7 @@ src/
     Experience.tsx              モードの表示分岐・URL同期・アクセント色
     experience.module.css       全画面のCSS Modules・レスポンシブ
     Hero/Hero.tsx               HERO
+    Hero/HeroTurntable.tsx      TOPの8方向表示・ドラッグ・慣性・キーボード操作
     Hero/Concept.tsx            ブランドコンセプト
     Navigation/Navigation.tsx   PC・共通ヘッダー
     MobileNavigation/MobileNavigation.tsx  下部固定ナビ・メニューダイアログ
@@ -92,7 +93,8 @@ src/
     preload.ts                 重複を避けた近接画像の先読み
     useMotion.ts               GSAP・reduced motion
 public/
-  images/hero.png               生成モデル写真
+  images/hero.png               旧HERO／CONCEPT用の生成モデル写真
+  images/hero-360/              TOP用の同一モデル8方向sprite・正面画像
   hair/{color}/01.webp–08.webp  8方向×8色、64枚のデモ画像
 scripts/
   generate-hair.mjs             オリジナルSVGからWebPデモ素材を再生成
@@ -118,7 +120,9 @@ Next.jsが起動時に生成する `AGENTS.md` / `CLAUDE.md` はフレームワ�
 
 ## 画像の差し替え
 
-現在の360°用64枚は、提供された `hair_color_variations_64_images.zip` の8色×8方向のモデル画像です。HEROとは別モデルです。元画像は140〜141×125〜126px。一部に含まれる隣の行・白い区切り線を除去して共通の高さ100pxで切り出し、ロスレスWebPに変換しています。元ZIPは変更していません。元画像に起因する色間の構図差・拡大時の粗さは残ります。各STYLEは共通シーケンスを参照し、8スタイルそれぞれの実作品写真は未提供です。
+STYLE画面の360°用64枚は、提供された `hair_color_variations_64_images.zip` の8色×8方向のモデル画像です。TOPとは別モデルです。元画像は140〜141×125〜126px。一部に含まれる隣の行・白い区切り線を除去して共通の高さ100pxで切り出し、ロスレスWebPに変換しています。元ZIPは変更していません。元画像に起因する色間の構図差・拡大時の粗さは残ります。各STYLEは共通シーケンスを参照し、8スタイルそれぞれの実作品写真は未提供です。
+
+TOPは `public/images/hero-360/turntable-v2.avif` / `.webp` の4列×2行spriteを使用します。順序は正面、右斜め前、右側面、右斜め後ろ、背面、左斜め後ろ、左側面、左斜め前です。差し替える場合は各マスを同じ正方形、人物の中心・大きさ・照明・衣装を固定してください。`front-v2.webp` はOpening粒子の生成元なので、正面を差し替えた後に `pnpm assets:particles` を実行します。
 
 次のファイルを同じ名前の実写WebPで置き換えるだけで、ビューアーがそのまま動きます。
 
@@ -144,13 +148,13 @@ public/hair/pink/01.webp ... 08.webp
 | 07.webp | 6 | 横 / 270° |
 | 08.webp | 7 | 斜め / 315° |
 
-全カラーで同じモデル・カメラ位置・向き・切り抜き位置に統一してください。推奨は600×800以上の同一寸法。HEROは `public/images/hero.png`、スタイル写真は `src/data/styles.ts` の `image` / `position` を編集します。デモ表示文言も実写納品後に更新してください。
+全カラーで同じモデル・カメラ位置・向き・切り抜き位置に統一してください。推奨は600×800以上の同一寸法。CONCEPT画像は `public/images/hero.png`、スタイル写真は `src/data/styles.ts` の `image` / `position` を編集します。デモ表示文言も実写納品後に更新してください。
 
 パスや拡張子を変える場合は `src/data/hairStyles.ts` を編集します。提供画像は `pnpm assets:import <展開済みhair_color_variations_64フォルダ>` で取り込み直せます。元のマネキン生成は `pnpm assets:demo` に残していますが、提供画像を上書きするため通常は実行しません。
 
 ## 読み込みとアニメーション
 
-64枚の一括ロードはしません。現在のSTYLE・COLOR・ANGLEの画像を優先表示し、同色の前後1枚だけを先読みします。COLOR UIがある時だけ、使用可能な次の色の現在角度を1枚先読みします。画像領域の寸法を固定し、HEROにはNext Imageの優先読み込みを指定しています。画像欠落時は共通の `public/images/placeholder.svg` を表示します。
+STYLE用64枚は一括ロードしません。現在のSTYLE・COLOR・ANGLEの画像を優先表示し、同色の前後1枚だけを先読みします。COLOR UIがある時だけ、使用可能な次の色の現在角度を1枚先読みします。TOPは8方向をまとめた約77KBのAVIF spriteを優先取得し、WebPへフォールバックします。画像領域の寸法は固定し、STYLE画像欠落時は共通の `public/images/placeholder.svg` を表示します。
 
 カラー変更はopacity / blur / scaleで500ms、スタイル変更はopacity / x / scaleで500ms、モード変更は650ms。常時ループするアニメーションはありません。ドラッグ時の角度更新は即時です。
 
@@ -333,9 +337,9 @@ ShaderはReact内の長い文字列にせず `.vert` / `.frag` / `.glsl` を正�
 
 ### Openingと状態の責務
 
-`sessionStorage.noir-opening-portrait-v3` で初回HOMEのみ人物形成を再生します。実際のHERO画像から輪郭・顔・髪を優先して採った点群が、左右の髪先から曲線を描いて1.75秒までに人物へ収束します。輪郭の発光を挟み、2.15〜3.2秒でぼけた下絵から同じ位置の写真へ移ります。再生時間は描画準備後3.25秒。スマホは700点以下でも人物を読めるLOD順と薄い写真の段階的な重ね合わせを使います。右下の↻ボタンで再生可能、SKIPは常にDOMボタンです。Deep Link・reduced-motion・Save-Dataでは省略します。点群とCanvasの準備が1.8秒を超える場合は写真へ退避します。写真のdecodeは点群の開始条件にしません。失敗した準備を再生済みとして記録せず、次の訪問で再試行できます。HEROは最初からpriorityで取得し、JavaScriptが失敗してもCSSの安全な表示へ復帰します。
+`sessionStorage.noir-opening-portrait-v4` で初回HOMEのみ人物形成を再生します。TOPターンテーブルの正面画像から輪郭・顔・髪を優先して採った点群が、左右の髪先から曲線を描いて1.75秒までに人物へ収束します。輪郭の発光を挟み、2.15〜3.2秒でぼけた下絵から同じ位置の写真へ移ります。再生時間は描画準備後3.25秒。スマホは700点以下でも人物を読めるLOD順と薄い写真の段階的な重ね合わせを使います。右下の↻ボタンで再生可能、SKIPは常にDOMボタンです。Deep Link・reduced-motion・Save-Dataでは省略します。点群とCanvasの準備が1.8秒を超える場合は写真へ退避します。失敗した準備を再生済みとして記録せず、次の訪問で再試行できます。
 
-`pnpm assets:particles` が `public/images/hero.png` から `public/data/hero-particles.json`（6,000点、約207KB / gzip約54KB）を生成します。HERO差し替え時に再生成してください。これは写真に一致する2D点群で、未提供の3D人物モデルを使ったものではありません。再生開始はCanvasの準備完了後に揃え、写真と粒子でobject-fit / object-positionを合わせています。初回の写真表示タイミングを変更したため、以前のLCP計測値は今回の演出の性能保証には使用しません。
+`pnpm assets:particles` が `public/images/hero-360/front-v2.webp` から `public/data/hero-particles.json`（6,000点、約207KB / gzip約54KB）を生成します。正面画像の差し替え時に再生成してください。Openingは写真に一致する2D点群で、回転表示は8方向の実画像spriteです。GLBによる連続的な3D人物モデルではありません。
 
 `previewStore.ts` は永続化しない比較用ドラフトです。色を試すだけでは selectedColor・料金・URL・予約文を更新しません。APPLYが既存 `setColor` を一度呼び、選択を即時確定します。続く850msの拡大・光・画像置換は演出だけなので、途中でBOOKを押しても最新の選択を取得できます。ANGLEはAPPLYの入力に含めません。STYLE / 確定色の変更時には古い候補を破棄します。確定した状態のlocalStorage保存、Back、RESETはPhase 2の仕組みを維持します。
 
@@ -359,6 +363,7 @@ document.hidden、IntersectionObserverで画面外、SALON表示中はR3Fのfram
 - Lensのテクスチャ読込失敗：DOM比較へ切替。画像自体がない場合はSafeImageのplaceholder。
 - スマホ：レンズ追従・HERO移動・カスタムカーソルなし。比較はrange inputでキーボードにも対応。
 - 360°は既存の横ドラッグ、比較sliderは独立した操作領域。イベント伝播を止め、角度操作へ混入させない。縦スクロールはpan-yを維持。
+- TOPの360°も横方向を確定するまでpointer captureせず、縦操作をページスクロールへ渡す。選んだ角度はSTYLE / COLORの `selectedAngle` に引き継ぐ。
 - reduced-motion：粒子とHERO移動なし、レンズ歪みなし、画像の短い切替、Light Sweepなし。
 - BOOKING / MENU / SALONはDOM中心。WebGLエラーを予約のエラーへ伝播させない。
 

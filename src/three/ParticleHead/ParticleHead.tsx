@@ -49,12 +49,23 @@ export function ParticleHead({ portrait, clock, onReady }: {
   }), [mobile]);
   useEffect(() => () => geometry.dispose(), [geometry]);
   useEffect(() => {
-    const photo = document.querySelector<HTMLImageElement>("[data-hero-photo] img");
+    const photo = document.querySelector<HTMLElement>("[data-hero-portrait]") ??
+      document.querySelector<HTMLImageElement>("[data-hero-photo] img");
     if (!photo) return;
     const align = () => {
 
       const box = photo.getBoundingClientRect(), canvas = gl.domElement.getBoundingClientRect();
       if (!canvas.width || !canvas.height) return;
+      if (photo.matches("[data-hero-portrait]")) {
+        fit.current.rect.set(
+          (box.left - canvas.left) / canvas.width,
+          (box.top - canvas.top) / canvas.height,
+          box.width / canvas.width,
+          box.height / canvas.height,
+        );
+        fit.current.dpr = gl.getPixelRatio();
+        return;
+      }
       const css = getComputedStyle(photo);
       const scale = css.objectFit === "cover" ? Math.max(box.width / portrait.width, box.height / portrait.height) : Math.min(box.width / portrait.width, box.height / portrait.height);
       const width = portrait.width * scale, height = portrait.height * scale;
