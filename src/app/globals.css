@@ -297,6 +297,10 @@ button:disabled {
   font-size: 22px; color: #dadce8; background: #05050545;
 }
 .opening-replay:hover { background: #ffffff16; border-color: #ffffff90; }
+@media (max-width: 700px) {
+  /* Keep controls above the 64px bottom nav when the 590px hero exceeds the viewport (header: 87px). */
+  .opening-skip, .opening-replay { bottom: max(8%, calc(100% + 167px + env(safe-area-inset-bottom) - 100svh)); }
+}
 @media (prefers-reduced-motion: reduce) {
   [data-intro="pending"] [data-hero-photo] { animation: none; opacity: 1; }
 }

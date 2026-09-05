@@ -213,7 +213,8 @@ test("portrait particles form before the photo, and the opening can replay", asy
   const photo = page.locator("[data-hero-photo]");
   await expect(hero).toHaveAttribute("data-intro", "forming");
   expect(await photo.evaluate(e => Number(getComputedStyle(e).opacity))).toBeLessThan(.2);
-  await expect(hero).toHaveAttribute("data-intro", "portrait");
+  // Observe each animation frame; coarse assertion polling can miss this 500ms phase.
+  await page.waitForFunction(() => document.querySelector("[data-intro]")?.getAttribute("data-intro") === "portrait");
   const canvas = page.getByTestId("particle-opening").locator("canvas");
   const count = Number(await canvas.getAttribute("data-particles"));
   expect(count).toBeGreaterThan(0);
@@ -226,6 +227,17 @@ test("portrait particles form before the photo, and the opening can replay", asy
   await page.getByRole("button", { name: "SKIP INTRO ↗" }).click();
   await expect(hero).toHaveAttribute("data-intro", "rest");
   await expect(photo).toHaveCSS("opacity", "1");
+  if (info.project.name === "mobile") {
+    await page.setViewportSize({ width: 390, height: 664 });
+    const replay = page.getByRole("button", { name: "人物形成の演出を再生" });
+    const replayBox = await replay.boundingBox();
+    expect(replayBox!.y + replayBox!.height).toBeLessThanOrEqual(584);
+    await replay.click();
+    const skip = page.getByRole("button", { name: "SKIP INTRO ↗" });
+    const skipBox = await skip.boundingBox();
+    expect(skipBox!.y + skipBox!.height).toBeLessThanOrEqual(584);
+    await skip.click();
+  }
 });
 
 test("missing portrait data reveals the photo and keeps the booking entry available", async ({ page }) => {
