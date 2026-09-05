@@ -1,0 +1,6 @@
+nodeLinker: hoisted
+packageImportMethod: copy
+symlink: false
+allowBuilds:
+  sharp: true
+  unrs-resolver: true

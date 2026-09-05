@@ -1,0 +1,14 @@
+node_modules/
+.next/
+test-results/
+playwright-report/
+*.tsbuildinfo
+*.log
+.env*
+!.env.example
+
+# Local source archives and verification outputs
+*.zip
+docs/audit/
+docs/screenshots/
+.vercel/
