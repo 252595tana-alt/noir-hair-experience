@@ -1,5 +1,9 @@
 # NŌIR — HAIR IS IDENTITY.
 
+公開デモ：**[noir-hair-experience.vercel.app](https://noir-hair-experience.vercel.app/)**
+
+GitHubの `main` 更新はVercelへ自動デプロイされます。デモはURLから誰でも閲覧できますが、店舗情報と予約先が未設定のため検索エンジン向けにはnoindexを維持しています。
+
 美容室向けインタラクティブサイト / Phase 4。Phase 1〜3の選択・予約連携とWebGL表現を保ち、画像・フォント・描画負荷、SEO、店舗設定、予約URL、アクセシビリティを整備しました。Next.js・TypeScript strict・React・Zustand・GSAP・Three.js・React Three Fiber・GLSL・CSS Modulesを使用します。
 
 ひとつの画面からSTYLE / COLOR / STYLIST / MENU / BOOKINGへ切り替える構成です。実店舗情報と予約URLは未提供のため、現在は架空サロンのプレビュー・検索非公開設定です。正しい情報を `.env.local` とデータファイルに設定すれば、LINE / WEB予約先へ遷移できます。予約確定処理は予約先のシステムで行います。
