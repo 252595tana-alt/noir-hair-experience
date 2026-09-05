@@ -2,9 +2,10 @@
 
 - `public/images/hero.png`：内蔵image_genツールで新規生成。架空の成人モデル。写真の追加編集はしていません。
 - `public/images/hero-360/turntable-v2.avif|webp`：上記HEROを参照し、内蔵image_genツールで作成した同一モデルの4列×2行・8方向ターンテーブル。1776×888へ正規化し、ブラウザ表示用spriteとして圧縮。`front-v2.webp` は正面フレームとOpening点群の生成元。初稿で逆転していた左右斜め後ろを並べ直し、不足していた左斜め前を専用生成して差し替え済み。
+- `public/images/styles-v2/*.webp`：LONG / WOLF / PERM / BOB / SHORT / BLEACH / LAYER / CREATIVEの代表写真8点。既存HEROと同じ架空の成人女性・黒背景・黒衣装・リムライトを基準に内蔵imagegenで制作し、すべて1024×1536pxへ統一。最終プロンプトセットは [STYLE_IMAGE_PROMPTS_V2.md](STYLE_IMAGE_PROMPTS_V2.md)。
 - `public/hair/*/*.webp`：Phase 3でユーザー提供の `hair_color_variations_64_images.zip` に置換。8色×8方向。`scripts/import-hair-assets.mjs` で区切り線・隣行を除去し、140〜141×100pxの比較範囲をロスレスWebP化。元ZIPは保持。拡大時の粗さと色ごとの構図差が残るため、実作品の高解像度素材への差し替えを推奨。
 - スタッフのイニシャル画像・概念地図：DOM/CSSで構成したデモ。
-- フォント：Google FontsのBarlow Condensed / DM Sans。通信できない場合はシステムフォントへフォールバック。
+- フォント：Barlow Condensed / DM Sansを `next/font` で自己配信。読込できない場合はシステムフォントへフォールバック。
 
 ## HERO生成プロンプト
 

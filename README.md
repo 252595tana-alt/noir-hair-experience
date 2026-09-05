@@ -95,6 +95,7 @@ src/
 public/
   images/hero.png               旧HERO／CONCEPT用の生成モデル写真
   images/hero-360/              TOP用の同一モデル8方向sprite・正面画像
+  images/styles-v2/             8 STYLE固有の1024×1536px代表写真
   hair/{color}/01.webp–08.webp  8方向×8色、64枚のデモ画像
 scripts/
   generate-hair.mjs             オリジナルSVGからWebPデモ素材を再生成
@@ -120,7 +121,11 @@ Next.jsが起動時に生成する `AGENTS.md` / `CLAUDE.md` はフレームワ�
 
 ## 画像の差し替え
 
-STYLE画面の360°用64枚は、提供された `hair_color_variations_64_images.zip` の8色×8方向のモデル画像です。TOPとは別モデルです。元画像は140〜141×125〜126px。一部に含まれる隣の行・白い区切り線を除去して共通の高さ100pxで切り出し、ロスレスWebPに変換しています。元ZIPは変更していません。元画像に起因する色間の構図差・拡大時の粗さは残ります。各STYLEは共通シーケンスを参照し、8スタイルそれぞれの実作品写真は未提供です。
+STYLE COLLECTIONの代表写真は `public/images/styles-v2/` にLONG / WOLF / PERM / BOB / SHORT / BLEACH / LAYER / CREATIVEの8点を配置しています。すべて1024×1536pxのWebPで、STYLE通常表示、STYLIST作品カード、切替演出、STYLE別OGへ連動します。
+
+代表写真を再制作する際は `styles-v3` のような新しいversionedディレクトリへ配置し、`styles.ts` とOG出力名を更新します。公開済みURLのブラウザ・SNSキャッシュに旧画像を残さないためです。
+
+STYLE画面の360°用64枚は、提供された `hair_color_variations_64_images.zip` の8色×8方向のモデル画像です。TOPとは別モデルです。元画像は140〜141×125〜126px。一部に含まれる隣の行・白い区切り線を除去して共通の高さ100pxで切り出し、ロスレスWebPに変換しています。元ZIPは変更していません。元画像に起因する色間の構図差・拡大時の粗さは残ります。360° / COLOR / BOOKINGは現在この共通シーケンスを参照します。
 
 TOPは `public/images/hero-360/turntable-v2.avif` / `.webp` の4列×2行spriteを使用します。順序は正面、右斜め前、右側面、右斜め後ろ、背面、左斜め後ろ、左側面、左斜め前です。差し替える場合は各マスを同じ正方形、人物の中心・大きさ・照明・衣装を固定してください。`front-v2.webp` はOpening粒子の生成元なので、正面を差し替えた後に `pnpm assets:particles` を実行します。
 
@@ -148,7 +153,7 @@ public/hair/pink/01.webp ... 08.webp
 | 07.webp | 6 | 横 / 270° |
 | 08.webp | 7 | 斜め / 315° |
 
-全カラーで同じモデル・カメラ位置・向き・切り抜き位置に統一してください。推奨は600×800以上の同一寸法。CONCEPT画像は `public/images/hero.png`、スタイル写真は `src/data/styles.ts` の `image` / `position` を編集します。デモ表示文言も実写納品後に更新してください。
+全カラーで同じモデル・カメラ位置・向き・切り抜き位置に統一してください。推奨は600×800以上の同一寸法。CONCEPT画像は `public/images/hero.png`、代表写真は `public/images/styles-v2/` と `src/data/styles.ts` の `image` / `position` を編集します。代表写真更新後は `pnpm assets:production` でSTYLE別OGも再生成します。
 
 パスや拡張子を変える場合は `src/data/hairStyles.ts` を編集します。提供画像は `pnpm assets:import <展開済みhair_color_variations_64フォルダ>` で取り込み直せます。元のマネキン生成は `pnpm assets:demo` に残していますが、提供画像を上書きするため通常は実行しません。
 
@@ -377,7 +382,7 @@ silver_white → silver、ash_gray → ash、blond → blonde、dark_brown → d
 
 ### Phase 4で改善する点
 
-1. 実作品ごとに、同一カメラ・照明・位置で撮影した高解像度8方向×使用可能色を用意。現在の提供画像の小ささ・構図差を解消する。
+1. STYLE代表写真8点は高解像度化済み。360° / COLOR / BOOKINGをSTYLE別にする場合は、実作品ごとに同一カメラ・照明・位置で撮影した8方向×使用可能色を用意し、現在の共通シーケンスを置き換える。
 2. TOP人物形成は写真からの点群へ置換済み。今後、本物の3D回転が必要な場合はGLBと髪領域マスクを用意する。
 3. 実機iPhone Safariで長時間操作・メモリ圧迫・タブ復帰を計測する。今回のモバイル検証はChromeのタッチ端末エミュレーションであり、実機Safari確認の代替ではない。
 4. 端末別の実測からFPS閾値・画像解像度・Tier判定を調整。必要になった時だけ圧縮GPU textureや軽いpostprocessingを検討する。
@@ -424,15 +429,15 @@ URL未設定時は送信せず、生成文確認・コピー・準備中案内�
 
 HairSalon（LocalBusinessのサブタイプ）・必要なPerson・BreadcrumbListをJSON-LDに出力し、`safeJsonLd` でHTML終端を無害化します。実在しない所在地・レビュー・星評価は生成しません。構文とSSRを自動検証していますが、GoogleのRich Results Testによる公開URL検査は公開後に行ってください。
 
-各STYLEの `ogImage` で個別OG画像を指定できます。省略時は `/og/{slug}.jpg`、共通は `/og/salon.jpg`。現在は1200×630の9画像を生成済み。サロン名・画像・STYLE追加後は `pnpm assets:production` を実行し、必要ならスクリプト内OG対象を追加してください。
+各STYLEの `ogImage` で個別OG画像を指定できます。現在の8STYLEはSNS側の旧キャッシュを避けるため `/og/{slug}-v2.jpg`、共通は `/og/salon.jpg`。1200×630の9画像を生成済みです。サロン名・画像・STYLE追加後は `pnpm assets:production` を実行し、必要ならスクリプト内OG対象を追加してください。
 
 ### 画像追加・形式・先読み
 
 既存のSTYLE / COLOR / STYLIST / MENU追加方法は上のデータ編集手順を引き続き利用します。画像置換後は `pnpm assets:production` で画像variantと `data/imageManifest.json` を生成してください。
 
 - 360°DOM画像はpictureによるAVIF → WebP → JPEGの形式選択。読込失敗時は共通placeholder。
-- 幅は96 / 320 / 640 / 1024 / 1600を元画像幅で上限処理。現在の素材は約140pxなので96pxと原寸だけです。Tablet / Desktop向けに架空の高解像度素材を作りません。
-- ビューポートとDPRから必要なsrcsetを選び、画像領域の比率とwidth / heightを固定します。HEROはNext Imageの優先読み込みとAVIF / WebP配信。
+- 360°素材は96 / 320 / 640 / 1024 / 1600を元画像幅で上限処理。現在の360°素材は約140pxなので96pxと原寸だけです。Tablet / Desktop向けに架空の高解像度variantを作りません。
+- STYLE代表写真はWebGL切替・予測先読みと同じ圧縮済みWebP URLを使い、二重取得を避けます。TOPはAVIF / WebP sprite、CONCEPTはNext Imageで配信します。
 - 現在角度→近接±1→操作が2.5秒止まった時だけ現在色の残り角度を先読みします。TRYはユーザー操作時に優先。次候補は1枚だけで、他色全体をロードしません。
 - Save-Data / 2Gでは予測先読みと重いHEROを止め、Lowを選択。通常通信の予測URL記録も32件までです。
 - 画像が遅い間はplaceholderを表示し、BOOK操作をブロックしません。

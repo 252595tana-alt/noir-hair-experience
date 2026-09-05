@@ -114,7 +114,7 @@ export function StylistExperience() {
               <div>
                 <SafeImage
                   src={style.heroImage}
-                  alt={style.name + " / デモスタイル"}
+                  alt={style.name + " ヘアスタイル"}
                   fill
                   unoptimized
                   sizes="(max-width:700px) 40vw, 20vw"

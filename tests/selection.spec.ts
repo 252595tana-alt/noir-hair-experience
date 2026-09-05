@@ -5,6 +5,9 @@ import { stylists } from "../src/data/stylists";
 import { menus } from "../src/data/menu";
 import { colorMenuRequirements } from "../src/data/colorMenus";
 import { createBookingMessage } from "../src/lib/createBookingMessage";
+import { access } from "node:fs/promises";
+import { resolve } from "node:path";
+import sharp from "sharp";
 test.beforeEach(() => useSiteStore.getState().resetSelection());
 test("recommended services deduplicate and optional services survive dependency changes", () => {
   const state = useSiteStore.getState();
@@ -75,6 +78,22 @@ test("data relationships and booking message remain internally consistent", () =
   expect(createBookingMessage(useSiteStore.getState())).toBe(
     "スタイルについて相談希望です。",
   );
+});
+test("each STYLE has a unique production-size collection portrait", async () => {
+  const portraits = styles.map((style) => style.heroImage);
+  expect(new Set(portraits).size).toBe(styles.length);
+  for (const style of styles) {
+    const portrait = style.heroImage;
+    expect(portrait).toBe(`/images/styles-v2/${style.slug}.webp`);
+    expect(style.ogImage).toBe(`/og/${style.slug}-v2.jpg`);
+    expect(portrait).toMatch(/^\/images\/styles-v2\/[a-z-]+\.webp$/);
+    const file = resolve(process.cwd(), "public", portrait.slice(1));
+    await access(file);
+    const metadata = await sharp(file).metadata();
+    expect(metadata.width).toBe(1024);
+    expect(metadata.height).toBe(1536);
+    expect(metadata.format).toBe("webp");
+  }
 });
 import { sampleFps } from "../src/three/Performance/fps";
 import { usePerformanceTier } from "../src/hooks/usePerformanceTier";

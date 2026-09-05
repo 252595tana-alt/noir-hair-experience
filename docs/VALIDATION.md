@@ -123,3 +123,12 @@
 - Chrome 1440×1000、Pixel 7相当、Tablet 820×1180でドラッグ／タッチ／キー／縦スクロール／STYLE引き継ぎを確認。横overflow・pageerrorは0。
 - TypeScript strict、ESLint警告0、本番build成功。全67ケースは63成功・4対象外。
 - ローカルChrome 1回のラボ計測はPC LCP 524ms / CLS 0 / 操作event duration最大64ms、Mobile CPU 4倍 LCP 676ms / CLS 0 / 操作event duration最大240ms。JS受信量434,270 bytes。Mobile値は目標200msを超えるため、公開後の実機field INP確認が必要。
+
+# STYLE COLLECTION専用写真（2026-09-05）
+
+- LONG / WOLF / PERM / BOB / SHORT / BLEACH / LAYER / CREATIVEを、縦線・くびれ・波・水平線・首元の余白・高明度・翼状レイヤー・非対称という別々のシルエットで制作。
+- 既存HEROをidentityとキャンペーントーンの参照にし、黒背景・黒衣装・シルバーと淡い青紫のリムライトを統一。内蔵imagegenを使用し、全画像を1024×1536px WebPへ変換。
+- STYLE通常表示を全件coverへ統一し、旧140px画像の引き伸ばしと黒帯を解消。STYLIST作品カード、StyleFlow、STYLE別OGも同じ代表写真へ接続。
+- DOM表示・予測先読み・WebGL切替で同じ圧縮済みWebP URLを共有。LONG→WOLF実測で各画像の実転送は1回、再利用はキャッシュヒット。STYLE別OGは`/og/{slug}-v2.jpg`へversioning。
+- 360° / COLOR / BOOKINGは提供された共通64フレームを維持。STYLE別360°へ進める際は各STYLE×使用可能色×8角度の撮影素材が必要。
+- 8画像の一意性、1024×1536px、WebP形式を自動検証。本番ビルド全68ケースは64成功・4対象外。5ブラウザ環境でpageerror 0、axe違反0、8 STYLEページと8画像はすべてHTTP 200・placeholder未使用。

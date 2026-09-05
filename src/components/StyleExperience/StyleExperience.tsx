@@ -108,7 +108,7 @@ export function StyleExperience({
             <div ref={ref} className={s.frame}>
               <Image
                 src={style.heroImage}
-                alt={`${style.name} ヘアスタイル${index ? "・デモ素材" : ""}`}
+                alt={`${style.name} ヘアスタイル`}
                 fill
                 priority
                 unoptimized
@@ -116,7 +116,7 @@ export function StyleExperience({
                 sizes="(max-width:700px) 100vw, 50vw"
                 style={{
                   objectPosition: style.position,
-                  objectFit: index ? "contain" : "cover",
+                  objectFit: "cover",
                 }}
               />
             </div>
@@ -203,9 +203,6 @@ export function StyleExperience({
                 TRY COLOR <Arrow direction="up" />
               </button>
             </div>
-            {index > 0 && (
-              <p className={s.finePrint}>サンプル画像でのスタイル体験</p>
-            )}
           </>
         )}
         <div className={s.styleConnection}>

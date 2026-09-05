@@ -30,8 +30,8 @@ const baseStyles = [
     detail: "流れるライン、揺るがない個性。",
     tags: "SOFT LAYERS / NATURAL MOVEMENT",
     stylistId: "takuya",
-    image: "/images/hero.png",
-    position: "center 38%",
+    image: "/images/styles-v2/long.webp",
+    position: "center",
   },
   {
     id: "long-wolf",
@@ -40,7 +40,7 @@ const baseStyles = [
     detail: "ラフな動きに、意志を宿す。",
     tags: "FACE FRAMING / TEXTURED ENDS",
     stylistId: "takuya",
-    image: "/hair/ash/02.webp",
+    image: "/images/styles-v2/long-wolf.webp",
     position: "center",
   },
   {
@@ -50,7 +50,7 @@ const baseStyles = [
     detail: "計算しすぎない、美しいリズム。",
     tags: "AIRY TEXTURE / SOFT CURL",
     stylistId: "ren",
-    image: "/hair/dark-brown/08.webp",
+    image: "/images/styles-v2/perm.webp",
     position: "center",
   },
   {
@@ -60,7 +60,7 @@ const baseStyles = [
     detail: "シンプルだからこそ、私らしく。",
     tags: "CLEAN LINE / SILKY FINISH",
     stylistId: "yuki",
-    image: "/hair/black/01.webp",
+    image: "/images/styles-v2/bob.webp",
     position: "center",
   },
   {
@@ -70,7 +70,7 @@ const baseStyles = [
     detail: "余白で魅せる、新しいバランス。",
     tags: "SCULPTED SHAPE / LIGHT FEEL",
     stylistId: "ren",
-    image: "/hair/ash/03.webp",
+    image: "/images/styles-v2/short.webp",
     position: "center",
   },
   {
@@ -80,7 +80,7 @@ const baseStyles = [
     detail: "色からはじまる、次の私。",
     tags: "HIGH TONE / TRANSLUCENT COLOR",
     stylistId: "yuki",
-    image: "/hair/blonde/02.webp",
+    image: "/images/styles-v2/bleach.webp",
     position: "center",
   },
   {
@@ -90,7 +90,7 @@ const baseStyles = [
     detail: "重なりがつくる、軽やかな表情。",
     tags: "DIMENSION / EFFORTLESS LAYERS",
     stylistId: "takuya",
-    image: "/hair/beige/08.webp",
+    image: "/images/styles-v2/layer.webp",
     position: "center",
   },
   {
@@ -100,7 +100,7 @@ const baseStyles = [
     detail: "まだ知らない、自分に出会う。",
     tags: "PERSONAL EXPRESSION / NEW FORM",
     stylistId: "yuki",
-    image: "/hair/pink/02.webp",
+    image: "/images/styles-v2/creative.webp",
     position: "center",
   },
 ] as const;
@@ -127,6 +127,7 @@ export const styles: HairStyle[] = baseStyles.map((style, index) => {
     description: style.detail,
     defaultColor: defaults[index],
     heroImage: style.image,
+    ogImage: `/og/${style.slug}-v2.jpg`,
     hairImages: hairStyles,
     availableColors: ["perm", "bob"].includes(style.id)
       ? ["black", "ash", "dark-brown", "beige"]

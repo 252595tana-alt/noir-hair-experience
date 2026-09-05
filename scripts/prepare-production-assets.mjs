@@ -46,14 +46,14 @@ await mkdir("src/data", { recursive: true });
 await writeFile("src/data/imageManifest.json", JSON.stringify(manifest));
 await mkdir("public/og", { recursive: true });
 const styles = [
-  ["long", "LONG", "/images/hero.png"],
-  ["long-wolf", "WOLF", "/hair/ash/02.webp"],
-  ["perm", "PERM", "/hair/dark-brown/08.webp"],
-  ["bob", "BOB", "/hair/black/01.webp"],
-  ["short", "SHORT", "/hair/ash/03.webp"],
-  ["bleach", "BLEACH", "/hair/blonde/02.webp"],
-  ["layer", "LAYER", "/hair/beige/08.webp"],
-  ["creative", "CREATIVE", "/hair/pink/02.webp"],
+  ["long", "LONG", "/images/styles-v2/long.webp"],
+  ["long-wolf", "WOLF", "/images/styles-v2/long-wolf.webp"],
+  ["perm", "PERM", "/images/styles-v2/perm.webp"],
+  ["bob", "BOB", "/images/styles-v2/bob.webp"],
+  ["short", "SHORT", "/images/styles-v2/short.webp"],
+  ["bleach", "BLEACH", "/images/styles-v2/bleach.webp"],
+  ["layer", "LAYER", "/images/styles-v2/layer.webp"],
+  ["creative", "CREATIVE", "/images/styles-v2/creative.webp"],
   ["salon", "HAIR IS IDENTITY.", "/images/hero.png"],
 ];
 for (const [slug, name, path] of styles) {
@@ -71,7 +71,7 @@ for (const [slug, name, path] of styles) {
       { input: title, left: 0, top: 0 },
     ])
     .jpeg({ quality: 85 })
-    .toFile(`public/og/${slug}.jpg`);
+    .toFile(`public/og/${slug === "salon" ? slug : `${slug}-v2`}.jpg`);
 }
 console.log(
   "64 images: responsive AVIF/WebP/JPEG; 9 OG cards generated. Source resolution is not enlarged for the viewer.",
