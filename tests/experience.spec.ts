@@ -281,7 +281,7 @@ test("Phase 1 hero, drag and swipe, all angles and color loading remain intact",
 }, info) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "HAIR ISIDENTITY.",
+    "BE YOU.",
   );
   await nav(page, "style");
   await page.getByRole("button", { name: "次のスタイル", exact: true }).click();
@@ -397,3 +397,4 @@ test("image requests stay bounded on initial color entry", async ({ page }) => {
     .toBeGreaterThan(0);
   expect(new Set(requests).size).toBeLessThanOrEqual(5);
 });
+
