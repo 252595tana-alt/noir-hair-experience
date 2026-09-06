@@ -3,10 +3,12 @@ import { useSiteStore } from "@/store/useSiteStore";
 import { styleById } from "@/data/styles";
 import { colorById } from "@/data/hairStyles";
 import { stylistById } from "@/data/stylists";
+import { hairUnwovenStyleById } from "@/data/hairUnwovenStyles";
 import { go } from "@/lib/navigation";
 import s from "../experience.module.css";
 export function SelectionSummary() {
   const state = useSiteStore();
+  const editorialStyle = hairUnwovenStyleById(state.editorialStyleId);
   if (
     state.mode === "home" ||
     state.mode === "booking" ||
@@ -17,7 +19,9 @@ export function SelectionSummary() {
     <aside className={s.selectionSummary} aria-label="現在の選択">
       <span className={s.eyebrow}>YOUR SELECTION</span>
       <p>
-        {styleById(state.selectedStyleId)?.name ?? "STYLE / 相談"}
+        {editorialStyle?.title ??
+          styleById(state.selectedStyleId)?.name ??
+          "STYLE / 相談"}
         <br />
         {colorById(state.selectedColor).name}
         <br />

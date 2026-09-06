@@ -15,9 +15,11 @@ import { site } from "@/config/site";
 import { createLineBookingUrl } from "@/lib/bookingUrl";
 import { track } from "@/lib/analytics";
 import { selectionProperties } from "@/lib/selectionAnalytics";
+import { hairUnwovenStyleById } from "@/data/hairUnwovenStyles";
 export function Booking() {
   const state = useSiteStore();
   const style = styleById(state.selectedStyleId);
+  const editorialStyle = hairUnwovenStyleById(state.editorialStyleId);
   const [notice, setNotice] = useState("");
   const [messageOpen, setMessageOpen] = useState(false);
   const message = createBookingMessage(state);
@@ -54,7 +56,7 @@ export function Booking() {
                 />
               </div>
               <figcaption>
-                <span>YOUR STYLE / {style.name}</span>
+                <span>YOUR STYLE / {editorialStyle?.title ?? style.name}</span>
                 <span>{colorById(state.selectedColor).name}</span>
               </figcaption>
             </figure>

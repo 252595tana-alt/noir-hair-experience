@@ -135,7 +135,7 @@ test("responsive widths, reduced data, image formats, and idle WebGL", async ({
   await page.goto("/");
   await page.waitForTimeout(600);
   await expect(page.locator("canvas")).toHaveCount(0);
-  for (const width of [390, 430, 768, 1024, 1440, 1920]) {
+  for (const width of [320, 390, 430, 700, 701, 768, 1024, 1440, 1920]) {
     await page.setViewportSize({ width, height: 1000 });
     for (const path of ["/style/long-wolf", "/color", "/booking", "/salon"]) {
       await page.goto(path);

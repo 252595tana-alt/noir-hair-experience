@@ -5,6 +5,8 @@ const files = {
   utils: "shaders/utils.glsl",
   lensFragment: "HairLens/hairLens.frag",
   transitionFragment: "HairTransition/transition.frag",
+  hairRibbonVertex: "HairLoom/hairRibbon.vert",
+  hairRibbonFragment: "HairLoom/hairRibbon.frag",
   particleVertex: "ParticleHead/particleHead.vert",
   particleFragment: "ParticleHead/particleHead.frag",
 };

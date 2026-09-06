@@ -58,6 +58,40 @@ for (const profile of [
   await page.keyboard.press("Escape");
   await page.goBack();
   await expect(page.locator("main")).toHaveAttribute("data-mode", "color");
+  await page.goto(base + "/");
+  await page.waitForTimeout(4500);
+  const unwoven = page.getByTestId("hair-unwoven-gallery");
+  await unwoven.scrollIntoViewIfNeeded();
+  if (profile.mobile) {
+    await unwoven.getByRole("button", { name: "NEXT STYLE" }).click();
+  } else {
+    const stage = unwoven.getByTestId("hair-unwoven-stage");
+    const bounds = await stage.boundingBox();
+    if (!bounds) throw new Error("Hair Unwoven stage is not visible");
+    const x = bounds.x + bounds.width * 0.68;
+    const y = bounds.y + bounds.height * 0.5;
+    await page.mouse.move(x, y);
+    await page.mouse.wheel(72, 0);
+  }
+  await expect(unwoven).toHaveAttribute("data-current-style", "wave");
+  if (!profile.mobile) {
+    const stage = unwoven.getByTestId("hair-unwoven-stage");
+    const bounds = await stage.boundingBox();
+    if (!bounds) throw new Error("Hair Unwoven stage is not visible");
+    const x = bounds.x + bounds.width * 0.68;
+    const y = bounds.y + bounds.height * 0.5;
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x - 120, y + 3, { steps: 8 });
+    await page.mouse.up();
+    await expect(unwoven).toHaveAttribute("data-current-style", "bob");
+    await unwoven.getByRole("button", { name: "PREVIOUS STYLE" }).click();
+    await expect(unwoven).toHaveAttribute("data-current-style", "wave");
+  }
+  await unwoven
+    .getByRole("button", { name: "BOOK THIS STYLE — WAVE" })
+    .click();
+  await expect(page.getByTestId("plan-summary")).toContainText("WAVE");
   const violations = [];
   for (const path of [
     "/",

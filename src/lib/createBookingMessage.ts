@@ -3,10 +3,12 @@ import { colorById } from "@/data/hairStyles";
 import { stylistById } from "@/data/stylists";
 import { menus } from "@/data/menu";
 import type { Selection } from "./selection";
+import { hairUnwovenStyleById } from "@/data/hairUnwovenStyles";
 export function createBookingMessage(
   state: Pick<
     Selection,
     | "selectedStyleId"
+    | "editorialStyleId"
     | "selectedColor"
     | "selectedStylistId"
     | "selectedMenus"
@@ -15,6 +17,7 @@ export function createBookingMessage(
   >,
 ): string {
   const style = styleById(state.selectedStyleId);
+  const editorialStyle = hairUnwovenStyleById(state.editorialStyleId);
   if (state.consultation) return "スタイルについて相談希望です。";
   const stylist = stylistById(state.selectedStylistId);
   const selected = menus.filter((menu) =>
@@ -22,7 +25,7 @@ export function createBookingMessage(
   );
   return [
     style
-      ? style.name + "のスタイルで、"
+      ? (editorialStyle?.title ?? style.name) + "のスタイルで、"
       : "スタイルについて相談希望です。",
     ...(style || state.colorChosen
       ? [colorById(state.selectedColor).name + "カラーを希望しています。"]

@@ -132,3 +132,28 @@
 - DOM表示・予測先読み・WebGL切替で同じ圧縮済みWebP URLを共有。LONG→WOLF実測で各画像の実転送は1回、再利用はキャッシュヒット。STYLE別OGは`/og/{slug}-v2.jpg`へversioning。
 - 360° / COLOR / BOOKINGは提供された共通64フレームを維持。STYLE別360°へ進める際は各STYLE×使用可能色×8角度の撮影素材が必要。
 - 8画像の一意性、1024×1536px、WebP形式を自動検証。本番ビルド全68ケースは64成功・4対象外。5ブラウザ環境でpageerror 0、axe違反0、8 STYLEページと8画像はすべてHTTP 200・placeholder未使用。
+
+# Hair Unwoven Gallery（2026-09-06）
+
+HOMEのHERO直下に4作品のGalleryを追加。単一BufferGeometryを共有する2描画で、写真が帯状にほどけて次の写真へ移る。DOMの作品情報・VIEW／BOOKと既存のSTYLE／予約Storeを接続した。
+
+## 追加分の検証結果（確認時点）
+
+| 確認 | 結果 |
+|---|---|
+| TypeScript typecheck | 成功 |
+| ESLint | 成功・error / warning 0 |
+| 本番build | 成功 |
+| `tests/hair-unwoven.spec.ts` / Desktop | 10成功・1対象外 |
+| `tests/hair-unwoven.spec.ts` / Mobile | 9成功・2対象外 |
+| `tests/hair-unwoven.spec.ts` / Tablet | 9成功・2対象外 |
+| 全体Playwright 101ケース | 92成功・9対象外・失敗0 |
+| Chrome / Edge / WebKit / iPhone emulation / Android emulation | pageerror 0・axe違反0 |
+| 静止状態（stable）の目視 | 写真・作品情報・操作を確認 |
+| 遷移中（ribbon）の目視 | 写真が帯へほどける中間表現を確認 |
+
+Desktopの対象外1件はMobile／Tablet projectで実行する実タッチの縦横スワイプテスト。Mobile／Tabletの対象外2件は、Desktopで実行するマウス・wheelとGPU lifecycle診断。Gallery追加分と全体回帰テストを分けて集計した。
+
+追加テストでは、4作品の循環、PREVIOUS／NEXTと左右キー、wheel、マウスドラッグ、連続入力後の操作、全作品のVIEW／BOOK mapping、編集名、カラー互換性・ANGLE・OPTION・担当の引き継ぎ、Reduced Motion、WebGL不可時のDOM導線、縦スクロールと横スワイプ、画面遷移後のCanvas撤去とBack、SALON／画面外での停止、resize、Texture上限4、context lossを確認した。
+
+iPhone WebKitとAndroid Chromeはエミュレーションで確認済み。物理端末上のGPU性能と実際のSafari／Chromeタッチ挙動は、公開後の実機確認を残す。

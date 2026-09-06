@@ -13,6 +13,10 @@ import {
   isHairColor,
   type Selection,
 } from "@/lib/selection";
+import {
+  hairUnwovenStyleById,
+  type HairUnwovenStyleId,
+} from "@/data/hairUnwovenStyles";
 export type SiteState = Selection & {
   mode: SiteMode;
   salonOpen: boolean;
@@ -20,6 +24,7 @@ export type SiteState = Selection & {
   hasRotated: boolean;
   setMode: (mode: SiteMode) => void;
   setStyle: (id: string | null) => void;
+  setEditorialStyle: (id: HairUnwovenStyleId | null) => void;
   setColor: (color: HairColor) => void;
   setAngle: (angle: number) => void;
   setStylist: (id: string | null) => void;
@@ -45,7 +50,9 @@ export const useSiteStore = create<SiteState>()(
           const style = styleById(id);
           if (!style) return state;
           if (style.id === state.selectedStyleId)
-            return state.consultation ? { consultation: false } : state;
+            return state.consultation || state.editorialStyleId
+              ? { consultation: false, editorialStyleId: null }
+              : state;
           const selectedColor =
             (!state.selectedStyleId && !state.colorChosen) ||
             !style.availableColors.includes(state.selectedColor)
@@ -54,10 +61,21 @@ export const useSiteStore = create<SiteState>()(
           return reconcileSelection({
             ...state,
             selectedStyleId: style.id,
+            editorialStyleId: null,
             selectedColor,
             selectedStylistId: style.stylistId,
             consultation: false,
           });
+        }),
+      setEditorialStyle: (id) =>
+        set((state) => {
+          const editorial = hairUnwovenStyleById(id);
+          return {
+            editorialStyleId:
+              editorial?.styleId === state.selectedStyleId
+                ? editorial.id
+                : null,
+          };
         }),
       setColor: (color) =>
         set((state) => {
@@ -138,6 +156,7 @@ export const useSiteStore = create<SiteState>()(
       skipHydration: true,
       partialize: (state) => ({
         selectedStyleId: state.selectedStyleId,
+        editorialStyleId: state.editorialStyleId,
         selectedColor: state.selectedColor,
         selectedAngle: state.selectedAngle,
         selectedStylistId: state.selectedStylistId,

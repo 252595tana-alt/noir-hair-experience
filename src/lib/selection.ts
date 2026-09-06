@@ -4,8 +4,13 @@ import { stylistById } from "@/data/stylists";
 import { menus, estimate, timeBufferMin } from "@/data/menu";
 import { colorMenuRequirements } from "@/data/colorMenus";
 import { wrapAngle } from "./constants";
+import {
+  hairUnwovenStyleById,
+  type HairUnwovenStyleId,
+} from "@/data/hairUnwovenStyles";
 export type SelectionInput = {
   selectedStyleId: string | null;
+  editorialStyleId: HairUnwovenStyleId | null;
   selectedColor: HairColor;
   selectedAngle: number;
   selectedStylistId: string | null;
@@ -22,6 +27,7 @@ export type Selection = SelectionInput & {
 };
 export const initialSelection: SelectionInput = {
   selectedStyleId: null,
+  editorialStyleId: null,
   selectedColor: "black",
   selectedAngle: 0,
   selectedStylistId: null,
@@ -34,6 +40,7 @@ export function isHairColor(value: unknown): value is HairColor {
 }
 export function reconcileSelection(input: SelectionInput): Selection {
   const style = styleById(input.selectedStyleId);
+  const editorialStyle = hairUnwovenStyleById(input.editorialStyleId);
   const color =
     style && !style.availableColors.includes(input.selectedColor)
       ? style.defaultColor
@@ -59,6 +66,10 @@ export function reconcileSelection(input: SelectionInput): Selection {
   const plan = estimate(selectedMenus, nominationFee);
   return {
     ...input,
+    editorialStyleId:
+      editorialStyle && editorialStyle.styleId === style?.id
+        ? editorialStyle.id
+        : null,
     selectedColor: color,
     optionalMenus,
     selectedMenus,
@@ -86,6 +97,11 @@ export function restoreSelection(value: unknown): Selection {
       : undefined;
   return reconcileSelection({
     selectedStyleId: style?.id ?? null,
+    editorialStyleId:
+      typeof data.editorialStyleId === "string" &&
+      hairUnwovenStyleById(data.editorialStyleId)?.styleId === style?.id
+        ? (data.editorialStyleId as HairUnwovenStyleId)
+        : null,
     selectedColor: isHairColor(data.selectedColor)
       ? data.selectedColor
       : (style?.defaultColor ?? "black"),

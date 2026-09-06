@@ -15,7 +15,11 @@ export default defineConfig({
   projects: [
     {
       name: "desktop",
-      testMatch: ["**/experience.spec.ts", "**/webgl.spec.ts"],
+      testMatch: [
+        "**/experience.spec.ts",
+        "**/webgl.spec.ts",
+        "**/hair-unwoven.spec.ts",
+      ],
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1440, height: 1000 },
@@ -23,12 +27,20 @@ export default defineConfig({
     },
     {
       name: "mobile",
-      testMatch: ["**/experience.spec.ts", "**/webgl.spec.ts"],
+      testMatch: [
+        "**/experience.spec.ts",
+        "**/webgl.spec.ts",
+        "**/hair-unwoven.spec.ts",
+      ],
       use: { ...devices["Pixel 7"], defaultBrowserType: "chromium" },
     },
     {
       name: "tablet",
-      testMatch: ["**/experience.spec.ts", "**/webgl.spec.ts"],
+      testMatch: [
+        "**/experience.spec.ts",
+        "**/webgl.spec.ts",
+        "**/hair-unwoven.spec.ts",
+      ],
       use: {
         viewport: { width: 820, height: 1180 },
         isMobile: true,

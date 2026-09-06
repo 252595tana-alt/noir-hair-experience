@@ -179,6 +179,70 @@ Zustand・ナビ・カラーパレット・プラン・予約・SALONはDOM側�
 
 `style.hairImages[color][angle]` はスタイル別に差し替え可能です。Particle・GLSL Lens・Hair FlowをPhase 3で実装しました。実3D頭部モデル・予約APIは未接続です。WebGLから価格や推奨メニューを直接変更せず、既存のStoreアクションへ入力します。
 
+## Hair Unwoven Gallery
+
+HOMEのHERO直下に、写真が横方向の細いリボンへほどけ、次の写真へ組み上がる4作品のGalleryを追加しました。HEROとは独立した通常の縦スクロール領域で、既存のSTYLE一覧・詳細・COLOR・BOOKINGはそのまま利用できます。見出し、写真、作品情報、VIEW／BOOKはDOMに残し、Galleryが画面に近づいた時だけ装飾用Canvasをdynamic importします。新しいmodeやURLは追加していません。
+
+### 4作品のデータと画像変更
+
+`src/data/hairUnwovenStyles.ts` がGallery固有の表示情報を持ちます。`id` はGallery内の識別子、`styleId` は既存の選択・予約へ渡すIDです。Galleryのタイトルと予約対象のSTYLE名は次の対応です。
+
+| Gallery id / タイトル | 既存styleId / STYLE名 | 使用画像 |
+|---|---|---|
+| `straight` / STRAIGHT | `long` / LONG | `/images/styles-v2/long.webp` |
+| `wave` / WAVE | `perm` / PERM | `/images/styles-v2/perm.webp` |
+| `bob` / BOB | `bob` / BOB | `/images/styles-v2/bob.webp` |
+| `long` / LONG | `layer` / LAYER | `/images/styles-v2/layer.webp` |
+
+写真を差し替える時は画像を`public/`以下に配置し、該当項目の`image`を変更します。同じ設定をDOM写真とWebGL Textureが参照します。既存の1024×1536px、2:3の代表写真と同程度の解像度・構図を基本に、頭頂・毛先に余白を確保してください。`title`／`description`で表示文、`focusY`でShaderの縦方向crop位置を調整できます。DOM fallbackのcropは`HairUnwovenGallery.module.css`の`.fallbackImage img`でも確認してください。予約対象を変更する場合は、`styleId`を`src/data/styles.ts`に存在するIDへ合わせます。
+
+Galleryは代表写真の体験です。`hairImages`や既存の360°用64フレームは変更しません。STYLE／OGにも同じ写真変更を反映したい場合は、既存STYLE側の画像設定とOG生成手順も更新してください。
+
+### Geometry・Shader・遷移
+
+`ribbonGeometry.ts`が全リボンを単一のindexed `BufferGeometry`にまとめます。退場写真と入場写真の2つのmeshで同じGeometryを共有するため、リボン本数に比例した大量のmeshは作りません。Galleryの描画は2 draw callsを基本とし、Geometryはアンマウント時にdisposeします。
+
+| 端末・Tier | リボン本数 | 各リボンの横分割数 | 遷移中の描画上限 |
+|---|---:|---:|---:|
+| Desktop High | 60 | 24 | 60FPS |
+| Desktop Medium | 40 | 18 | 60FPS |
+| Mobile / Tablet相当 | 28 | 14 | 45FPS |
+
+属性`aRibbonIndex`／`aRandom`／`aBandUv`が、各帯の位置・決定的な揺らぎ・帯の縁を表します。Vertex Shaderで時差、横移動、波、緩い回転、pointerへの反応を計算し、Fragment Shaderで微かな色ずれ・ぼけ・縁の光・透明度を加えます。主なuniformは次のとおりです。
+
+| uniform | 用途 |
+|---|---|
+| `uProgress` / `uDirection` / `uRole` | 進行度0〜1、左右の方向、退場／入場の役割 |
+| `uTime` / `uMouse` | 波の時刻と滑らかに追従するpointer位置 |
+| `uTexture` / `uTextureSize` | 描画する写真とその寸法 |
+| `uResolution` / `uFocus` | 表示枠の寸法とcover crop位置 |
+| `uQuality` | Tierに応じた色ずれ・ぼけの強さ |
+
+GSAPが`power2.inOut`で進行度を駆動し、Highは1.42秒、Mediumは1.24秒で切り替えます。写真のTextureが揃ってから開始し、完了した`transitionId`だけを受け付けて作品情報を更新します。静止中はdemand render、遷移中だけ継続描画し、共通`WebGLExperience`で画面外・非表示タブ・SALON表示時の描画を停止します。GSAPも非表示タブとSALONに合わせてpause／resumeします。GLSLを変更したら`pnpm shaders`を実行します。`pnpm dev`／`pnpm build`でも`shaders.generated.ts`を自動更新します。
+
+### 入力・選択・予約への引き継ぎ
+
+PREVIOUS／NEXT、左右キー、横ドラッグ・スワイプ、wheelで作品を切り替えます。遷移中の追加操作は、最新方向1件だけをqueueに保持し、現在の遷移完了後に開始します。操作ごとにGeometryやGSAPを積み増しません。タッチ領域は`touch-action: pan-y`で、縦スワイプによるページスクロールを維持します。
+
+Gallery内の鑑賞操作では予約Storeを変更しません。VIEWで`setStyle(styleId)`→`setViewerOpen(false)`→`go("style")`を実行し、`/style/{slug}`の代表写真へ移動します。BOOKは既存STYLEとの対応を`setStyle(styleId)`で反映した後、`setEditorialStyle(id)`→`go("booking")`で現在表示中の編集名も渡します。たとえばWAVEは施術計算上のPERMへ接続しつつ、BOOKING表示と予約文にはWAVEとして残ります。担当者・推奨施術・概算価格・時間が反映され、利用可能な選択カラー、ANGLE、OPTIONは既存ルールで維持します。非対応カラーは対象STYLEのdefaultColorへ変更します。
+
+### FallbackとTexture管理
+
+Reduced Motion／Save-Data／Low Tier／WebGL不可の場合はCanvasを使わず、DOM写真と同じ操作・VIEW／BOOKを利用します。通常のDOM切替は560ms、Reduced Motion時は動きを抑えて120msで状態を切り替えます。Texture取得失敗・Canvas／Shaderエラー・context loss時もDOMへ復帰します。
+
+`TextureManager.ts`の`useTransitionTextures`は、次の2枚が両方ロードされるまで最後の有効なTextureペアを保持します。準備完了後にまとめて差し替え、それから以前の参照をreleaseするため、queue中のロード待ちで空のフレームを挟みません。世代tokenで古いリクエストの遅延結果を除外し、上限4件の`ResourceCache`で現在の参照を保護します。未使用Texture・不要になった遅延ロード・アンマウント時の資源をdisposeし、既存のCOLOR用`useManagedTextures`とは呼び出しを分けています。
+
+### 追加ファイルとテスト
+
+- データ：`src/data/hairUnwovenStyles.ts`
+- Gallery：`src/components/sections/HairUnwovenGallery.tsx`、`HairUnwovenGallery.module.css`
+- DOM情報・ナビ：`src/components/ui/StyleInfo.tsx`、`StyleNavigation.tsx`、`HairUnwovenUI.module.css`
+- WebGL：`src/three/HairLoom/HairLoomCanvas.tsx`、`HairRibbonScene.tsx`、`ribbonGeometry.ts`、`hairRibbon.vert`、`hairRibbon.frag`
+- 接続・共通処理：`Experience.tsx`、`TextureManager.ts`、`scripts/build-shaders.mjs`
+- 回帰テスト：`tests/hair-unwoven.spec.ts`。desktop／mobile／tabletの各projectに登録し、logic projectとは分離しています。
+
+追加テストは4作品の循環、左右キー、ホイール、マウスドラッグ、連続入力、全作品のVIEW／BOOK mappingと既存選択保持、Reduced Motion、WebGL不可、実タッチの縦横操作、遷移後のCanvas撤去とBack、SALON中の停止、resize、Texture上限、context lossを確認します。Gallery分だけ実行する場合は`pnpm exec playwright test tests/hair-unwoven.spec.ts`を使います。確認結果は`docs/VALIDATION.md`の「Hair Unwoven Gallery」に記録します。
+
 ## テスト
 
 開発サーバーを別ターミナルで起動し、インストール済みGoogle Chromeで実行します。
@@ -191,7 +255,7 @@ pnpm test
 
 Chromeがない場合は `playwright.config.ts` の `channel: 'chrome'` を外し、`pnpm exec playwright install chromium` を実行してください。別ポートは `TEST_BASE_URL` で指定できます。
 
-PC 1440×1000 / Pixel 7相当のMobile / Tablet 820×1180のブラウザ21テスト＋状態・データ・予約文のロジック3テスト、計24テストを実行します。スマホのスワイプはChromiumの実タッチ入力で再現します。iOS実機Safariでの最終確認は別途必要です。
+PC 1440×1000 / Pixel 7相当のMobile / Tablet 820×1180で各28ケース、ロジック17ケース、計101ケースを実行します。最終結果は92成功・9対象外・失敗0です。対象外は別projectで実行済みのデスクトップ専用GPU診断またはタッチ専用入力です。スマホのスワイプはChromiumの実タッチ入力で再現し、Chrome／Edge／WebKit desktop、iPhone WebKit emulation、Android Chrome emulationでもページエラー0・axe違反0を確認しています。iOS／Android実機でのGPU性能と物理タッチは公開後の最終確認対象です。
 
 ## 参考
 

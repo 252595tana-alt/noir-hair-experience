@@ -13,6 +13,7 @@ import { useMotion } from "@/lib/useMotion";
 import { Navigation } from "./Navigation/Navigation";
 import { MobileNavigation } from "./MobileNavigation/MobileNavigation";
 import { Hero } from "./Hero/Hero";
+import { HairUnwovenGallery } from "./sections/HairUnwovenGallery";
 import { Concept } from "./Hero/Concept";
 import { StyleExperience } from "./StyleExperience/StyleExperience";
 import { ModeBoundary, ModeLoading, SalonLoading } from "./ui/ModeBoundary";
@@ -109,7 +110,12 @@ export default function Experience({ children }: { children: ReactNode }) {
           children
         ) : (
           <ModeBoundary key={mode}>
-            {mode === "home" && <Hero />}
+            {mode === "home" && (
+              <>
+                <Hero />
+                <HairUnwovenGallery />
+              </>
+            )}
             {mode === "concept" && <Concept />}
             {mode === "style" && <StyleExperience />}
             {mode === "color" && <StyleExperience colorMode />}

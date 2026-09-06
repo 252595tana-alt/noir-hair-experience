@@ -1564,7 +1564,8 @@
     background: rgba(8, 8, 8, 0.96);
     backdrop-filter: blur(14px);
     border-top: 1px solid #333;
-    z-index: 30;
+    z-index: 200;
+    isolation: isolate;
   }
   .mobileNav button {
     font-size: 9px;

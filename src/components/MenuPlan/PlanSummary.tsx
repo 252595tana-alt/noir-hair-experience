@@ -3,12 +3,14 @@ import { useSiteStore } from "@/store/useSiteStore";
 import { styleById } from "@/data/styles";
 import { colorById } from "@/data/hairStyles";
 import { stylistById } from "@/data/stylists";
+import { hairUnwovenStyleById } from "@/data/hairUnwovenStyles";
 import { menus, yen } from "@/data/menu";
 import { go } from "@/lib/navigation";
 import type { SiteMode } from "@/lib/constants";
 import s from "../experience.module.css";
 export function PlanSummary({ full = false }: { full?: boolean }) {
   const state = useSiteStore();
+  const editorialStyle = hairUnwovenStyleById(state.editorialStyleId);
   const selected = menus.filter((menu) =>
     state.selectedMenus.includes(menu.id),
   );
@@ -17,7 +19,9 @@ export function PlanSummary({ full = false }: { full?: boolean }) {
       label: "STYLE",
       value: state.consultation
         ? "相談して決める"
-        : (styleById(state.selectedStyleId)?.name ?? "相談して決める"),
+        : (editorialStyle?.title ??
+          styleById(state.selectedStyleId)?.name ??
+          "相談して決める"),
       mode: "style",
     },
     {
