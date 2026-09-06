@@ -10,6 +10,8 @@ import { useMotion } from "@/lib/useMotion";
 import { Arrow } from "../ui/Arrow";
 import s from "../experience.module.css";
 import { ColorComparison } from "@/three/ColorComparison";
+import { hairTextureWidth, resolveHairAsset } from "@/lib/hairAssets";
+import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 export function HairViewer() {
   const mode = useSiteStore((state) => state.mode);
   const targetRef = useRef<HTMLDivElement>(null);
@@ -18,6 +20,7 @@ export function HairViewer() {
   const styleId = useSiteStore((state) => state.selectedStyleId);
   const frames = styleById(styleId)?.hairImages ?? hairStyles;
   const hasRotated = useSiteStore((state) => state.hasRotated);
+  const tier = usePerformanceTier((state) => state.tier);
   const imageRef = useRef<HTMLDivElement>(null);
   const gesture = useRef<{
     id: number;
@@ -29,26 +32,16 @@ export function HairViewer() {
   const src = frames[color]?.[angle] ?? "/images/placeholder.svg";
   useMotion(imageRef, String(styleId), "image");
   useEffect(() => {
+    const targetWidth = hairTextureWidth(tier);
     preloadImages(
       [
         frames[color]?.[wrapAngle(angle - 1)],
         frames[color]?.[wrapAngle(angle + 1)],
-      ].filter((url): url is string => Boolean(url)),
+      ]
+        .filter((url): url is string => Boolean(url))
+        .map((url) => resolveHairAsset(url, targetWidth)),
     );
-    const idle = setTimeout(
-      () =>
-        preloadImages(
-          frames[color].filter(
-            (_, i) =>
-              i !== angle &&
-              i !== wrapAngle(angle - 1) &&
-              i !== wrapAngle(angle + 1),
-          ),
-        ),
-      2500,
-    );
-    return () => clearTimeout(idle);
-  }, [color, angle, frames]);
+  }, [color, angle, frames, tier]);
   const step = (direction: number) => {
     const state = useSiteStore.getState();
     state.setAngle(state.selectedAngle + direction);
@@ -126,7 +119,7 @@ export function HairViewer() {
             unoptimized
             draggable={false}
             priority
-            sizes="(max-width:700px) 100vw, 50vw"
+            sizes="(max-width:700px) 88vw, (max-width:1024px) 43vw, 34vw"
             style={{ objectFit: "contain" }}
           />
         </div>

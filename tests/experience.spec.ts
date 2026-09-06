@@ -110,7 +110,7 @@ test("complete selection journey, CHANGE, salon, persistence and confirmed RESET
     await expect(plan).toContainText(text);
   await expect(page.getByTestId("booking-image")).toHaveAttribute(
     "src",
-    /\/hair\/silver\/05\.webp$/,
+    /\/hair\/silver\/05-768\.jpg$/,
   );
   await shot(page, info.project.name + "-phase2-booking");
   await page.getByRole("button", { name: "LINEで予約" }).click();

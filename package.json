@@ -11,6 +11,7 @@
     "test": "playwright test",
     "assets:demo": "node scripts/generate-hair.mjs",
     "assets:import": "node scripts/import-hair-assets.mjs",
+    "assets:color": "node scripts/prepare-color-assets.mjs",
     "assets:particles": "node scripts/sample-hero-particles.mjs",
     "assets:production": "node scripts/prepare-production-assets.mjs",
     "qa:browsers": "node scripts/qa-browsers.mjs",

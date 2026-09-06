@@ -3,7 +3,9 @@
 - `public/images/hero.png`：内蔵image_genツールで新規生成。架空の成人モデル。写真の追加編集はしていません。
 - `public/images/hero-360/turntable-v2.avif|webp`：上記HEROを参照し、内蔵image_genツールで作成した同一モデルの4列×2行・8方向ターンテーブル。1776×888へ正規化し、ブラウザ表示用spriteとして圧縮。`front-v2.webp` は正面フレームとOpening点群の生成元。初稿で逆転していた左右斜め後ろを並べ直し、不足していた左斜め前を専用生成して差し替え済み。
 - `public/images/styles-v2/*.webp`：LONG / WOLF / PERM / BOB / SHORT / BLEACH / LAYER / CREATIVEの代表写真8点。既存HEROと同じ架空の成人女性・黒背景・黒衣装・リムライトを基準に内蔵imagegenで制作し、すべて1024×1536pxへ統一。最終プロンプトセットは [STYLE_IMAGE_PROMPTS_V2.md](STYLE_IMAGE_PROMPTS_V2.md)。
-- `public/hair/*/*.webp`：Phase 3でユーザー提供の `hair_color_variations_64_images.zip` に置換。8色×8方向。`scripts/import-hair-assets.mjs` で区切り線・隣行を除去し、140〜141×100pxの比較範囲をロスレスWebP化。元ZIPは保持。拡大時の粗さと色ごとの構図差が残るため、実作品の高解像度素材への差し替えを推奨。
+- `assets/color-turnarounds/{black,ash,silver,blonde,dark-brown,beige,red,pink}.webp`：COLOR用のAI生成4列×2行マスター。各1536×1024px。8方向のセルは約378〜379×504pxで、人物、照明、切り抜き位置を色間で揃えています。旧ZIPの小画像を単純拡大したものではありません。生成方針は [COLOR_IMAGE_PROMPTS.md](COLOR_IMAGE_PROMPTS.md) に記録しています。
+- `public/hair/{color}/01.webp`〜`08.webp`：マスターを固定セルで分割し、Lanczos3と軽いsharpenで768×1024pxへ正規化したcanonical 64枚。各セルの元情報量を超えるネイティブ撮影ディテールを示すものではありません。
+- `public/hair/{color}/NN-{320,480,640,768}.{avif,webp,jpg}`：DOMのresponsive表示と端末Tier別WebGL Texture用variant。`src/data/imageManifest.json` が全64枚の寸法、幅、base URLを保持します。
 - スタッフのイニシャル画像・概念地図：DOM/CSSで構成したデモ。
 - フォント：Barlow Condensed / DM Sansを `next/font` で自己配信。読込できない場合はシステムフォントへフォールバック。
 
@@ -42,10 +44,20 @@ Constraints: exactly the same adult woman, facial identity, long hair length/cut
 Avoid: facing toward image-left, frontal pose, right three-quarter pose, changing face, hairstyle, outfit, scale or shoulder position, wind, extra people, borders, labels, text, logos, watermark.
 ```
 
+## COLOR素材の再生成
+
+リポジトリ直下で次を実行します。
+
+```bash
+pnpm assets:color
+```
+
+スクリプトは8マスターが1536×1024pxであることを検証し、固定4×2セルを01〜08の順で分割します。既存の `NN-WIDTH.avif|webp|jpg` だけを整理した後、768×1024px canonical、320 / 480 / 640 / 768pxのAVIF・WebP・JPEG、64件のmanifestを決定的に再生成します。色ID、枚数、マスター寸法、フレーム寸法が不正な場合は完了させません。
+
 ## Phase 4 配信用素材
 
-- `scripts/prepare-production-assets.mjs` が64フレームからAVIF / WebP / JPEGを2幅ずつ、計384variant生成。高解像度原本への置換時は最大1600pxまで複数幅を自動生成する。元画像を超えて拡大しない。
-- `src/data/imageManifest.json` が寸法とsrcset候補を保持。`HairImage` が対応形式を選択し、遅延・失敗時はplaceholderを表示。
+- COLORのcanonicalとvariantは `scripts/prepare-color-assets.mjs` が担当します。`scripts/prepare-production-assets.mjs` はCOLOR生成を同スクリプトへ委譲し、STYLE別OGなど残りの公開素材を生成します。
+- `src/data/imageManifest.json` が768×1024px、幅 `[320,480,640,768]`、base URLを保持。`HairImage` が表示幅に適した形式を選択し、遅延・失敗時はplaceholderを表示します。WebGLはHigh 768px、Medium 640pxを上限にし、Low TierではCanvasを作らず480px variantをDOM表示や先読みに使用します。
 - `public/og/`：STYLE 8点＋SALON 1点、1200×630 JPEG。STYLE名と設定サロン名を含む。生成時に `.env.local` 等の公開サロン名を読み込む。
 - フォントはPhase 4から `next/font` による自己配信。Google Fontsへの実行時アクセスは不要。ビルド時には取得用ネットワークが必要。
-- 原本ZIPは変更していない。提供画像の低解像度・構図差は最適化では解消できないため、正式公開時は実作品の高解像度画像への置換が必要。
+- 原本ZIPは変更していません。現在のAI生成COLOR素材はデモ用です。正式公開で実際の仕上がりを保証する場合は、同一カメラ・照明・切り抜きで撮影した実作品へ置き換えてください。

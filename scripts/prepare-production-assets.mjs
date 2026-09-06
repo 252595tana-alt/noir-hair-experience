@@ -1,49 +1,10 @@
 import sharp from "sharp";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir } from "node:fs/promises";
 import nextEnv from "@next/env";
+import { prepareColorVariants } from "./prepare-color-assets.mjs";
 nextEnv.loadEnvConfig(process.cwd());
 const salonName=(process.env.NEXT_PUBLIC_SALON_NAME||"NŌIR").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&apos;"})[c]);
-const colors = [
-  "black",
-  "ash",
-  "silver",
-  "blonde",
-  "dark-brown",
-  "beige",
-  "red",
-  "pink",
-];
-const manifest = {};
-for (const color of colors)
-  for (let i = 1; i <= 8; i++) {
-    const name = String(i).padStart(2, "0"),
-      base = `/hair/${color}/${name}`;
-    const input = await readFile(`public${base}.webp`),
-      meta = await sharp(input).metadata();
-    const widths = [...new Set([96,320,640,1024,1600].map(width=>Math.min(width,meta.width)))];
-    for (const width of widths)
-      for (const format of ["avif", "webp", "jpg"]) {
-        const pipeline = sharp(input).resize({
-          width,
-          withoutEnlargement: true,
-        });
-        const result =
-          format === "avif"
-            ? pipeline.avif({ quality: 65 })
-            : format === "webp"
-              ? pipeline.webp({ quality: 90 })
-              : pipeline.jpeg({ quality: 92 });
-        await result.toFile(`public${base}-${width}.${format}`);
-      }
-    manifest[base + ".webp"] = {
-      width: widths.at(-1),
-      height: Math.round(meta.height*widths.at(-1)/meta.width),
-      widths,
-      base,
-    };
-  }
-await mkdir("src/data", { recursive: true });
-await writeFile("src/data/imageManifest.json", JSON.stringify(manifest));
+const colorAssets = await prepareColorVariants();
 await mkdir("public/og", { recursive: true });
 const styles = [
   ["long", "LONG", "/images/styles-v2/long.webp"],
@@ -74,5 +35,5 @@ for (const [slug, name, path] of styles) {
     .toFile(`public/og/${slug === "salon" ? slug : `${slug}-v2`}.jpg`);
 }
 console.log(
-  "64 images: responsive AVIF/WebP/JPEG; 9 OG cards generated. Source resolution is not enlarged for the viewer.",
+  `64 color images: ${colorAssets.derivedFiles} responsive AVIF/WebP/JPEG variants at 320/480/640/768px; 9 OG cards generated.`,
 );

@@ -4,11 +4,17 @@ import { useCallback, useEffect, useState, type RefObject } from "react";
 import { HairImage as SafeImage } from "@/components/ui/HairImage";
 import { useWebGLSupport } from "@/hooks/useWebGLSupport";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useReducedData } from "@/hooks/useReducedData";
 import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 import { usePointerPosition } from "@/hooks/usePointerPosition";
 import { useSiteStore } from "@/store/useSiteStore";
 import { styleById } from "@/data/styles";
-import { hairStyles } from "@/data/hairStyles";
+import { colorById, hairStyles } from "@/data/hairStyles";
+import {
+  hairImageSizes,
+  hairTextureWidth,
+  resolveHairAsset,
+} from "@/lib/hairAssets";
 import { usePreviewStore, useTryColor } from "./previewStore";
 import { LightSweep } from "./LightSweep/LightSweep";
 const LensCanvas = dynamic(() => import("./HairLens/LensCanvas"), {
@@ -19,9 +25,10 @@ export function ColorComparison({
 }: {
   target: RefObject<HTMLDivElement | null>;
 }) {
-  const pointer = usePointerPosition(target);
+  const { pointer, setPointer } = usePointerPosition(target);
   const capable = useWebGLSupport(),
-    reduced = useReducedMotion();
+    reduced = useReducedMotion(),
+    saveData = useReducedData();
   const tier = usePerformanceTier((s) => s.tier);
   const color = useSiteStore((s) => s.selectedColor),
     angle = useSiteStore((s) => s.selectedAngle),
@@ -36,7 +43,12 @@ export function ColorComparison({
   const frames = styleById(styleId)?.hairImages ?? hairStyles;
   const currentSrc = frames[applying ? preview.from : color][angle];
   const trySrc = frames[applying ? color : candidate][angle];
-  const lens = capable && !reduced && fine && tier !== "low" && !failed;
+  const textureWidth = hairTextureWidth(tier);
+  const currentTexture = resolveHairAsset(currentSrc, textureWidth);
+  const tryTexture = resolveHairAsset(trySrc, textureWidth);
+  const tryAccent = colorById(applying ? color : candidate).accent;
+  const lens =
+    capable && !reduced && !saveData && fine && tier !== "low" && !failed;
   const fail = useCallback(() => setFailed(true), []);
   useEffect(() => {
     const media = matchMedia("(pointer: fine) and (min-width: 768px)");
@@ -68,7 +80,7 @@ export function ColorComparison({
             fill
             unoptimized
             draggable={false}
-            sizes="50vw"
+            sizes={hairImageSizes}
           />
         )}
         <div
@@ -81,7 +93,7 @@ export function ColorComparison({
             fill
             unoptimized
             draggable={false}
-            sizes="50vw"
+            sizes={hairImageSizes}
           />
         </div>
         {!applying && !lens && (
@@ -89,17 +101,20 @@ export function ColorComparison({
         )}
         {lens && (
           <LensCanvas
-            current={currentSrc}
-            candidate={trySrc}
+            current={currentTexture}
+            candidate={tryTexture}
+            accent={tryAccent}
             pointer={pointer}
             applying={applying}
             onFailure={fail}
           />
         )}
       </div>
-      {!lens && !applying && (
+      {!applying && (
         <label
           className="comparison-control"
+          data-visual={lens ? "veil" : "split"}
+          style={{ "--try-accent": tryAccent } as React.CSSProperties}
           onPointerDown={(e) => e.stopPropagation()}
           onPointerMove={(e) => e.stopPropagation()}
           onPointerUp={(e) => e.stopPropagation()}
@@ -113,7 +128,11 @@ export function ColorComparison({
             min="0"
             max="100"
             value={split}
-            onChange={(e) => setSplit(Number(e.target.value))}
+            onChange={(e) => {
+              const next = Number(e.target.value);
+              setSplit(next);
+              setPointer(next / 100, 0.55);
+            }}
             aria-label="BEFORE / AFTER カラー比較"
           />
         </label>

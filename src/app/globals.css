@@ -179,9 +179,14 @@ dialog {
 .comparison-control input {
   width: 100%;
   height: 28px;
-  accent-color: #d4d5d6;
+  accent-color: var(--try-accent, #d4d5d6);
   cursor: ew-resize;
   touch-action: pan-y;
+}
+.comparison-control[data-visual="veil"] {
+  background: #050505a8;
+  border: 1px solid #ffffff12;
+  backdrop-filter: blur(8px);
 }
 .hair-light-sweep {
   position: absolute;

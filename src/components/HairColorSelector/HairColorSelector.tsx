@@ -6,11 +6,14 @@ import { useSiteStore } from "@/store/useSiteStore";
 import { preloadImages } from "@/lib/preload";
 import s from "../experience.module.css";
 import { usePreviewStore, useTryColor } from "@/three/previewStore";
+import { hairTextureWidth, resolveHairAsset } from "@/lib/hairAssets";
+import { usePerformanceTier } from "@/hooks/usePerformanceTier";
 export function HairColorSelector() {
   const candidate = useTryColor();
   const color = useSiteStore((state) => state.selectedColor),
     angle = useSiteStore((state) => state.selectedAngle),
     styleId = useSiteStore((state) => state.selectedStyleId);
+  const tier = usePerformanceTier((state) => state.tier);
   const style = styleById(styleId);
   const available = style?.availableColors ?? hairColors.map((item) => item.id);
   const frames = style?.hairImages ?? hairStyles;
@@ -18,8 +21,9 @@ export function HairColorSelector() {
     const index = available.indexOf(color);
     const next = available[(index + 1) % available.length];
     const src = frames[next]?.[angle];
-    if (src) preloadImages([src]);
-  }, [color, angle, available, frames]);
+    if (src)
+      preloadImages([resolveHairAsset(src, hairTextureWidth(tier))]);
+  }, [color, angle, available, frames, tier]);
   return (
     <div className={s.colorSelector}>
       <div className={s.colorLabel}>

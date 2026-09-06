@@ -1,8 +1,60 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect, type Locator, type Page } from "@playwright/test";
 const selection = (page: Page) =>
   page.evaluate(
     () => JSON.parse(localStorage.getItem("noir-selection-v2")!).state,
   );
+
+async function expectSourceWidthAtLeast(image: Locator, width: number) {
+  await expect
+    .poll(async () => {
+      const currentSrc = await image.evaluate(
+        (element) => (element as HTMLImageElement).currentSrc,
+      );
+      return Number(currentSrc.match(/-(\d+)\.(?:avif|webp|jpg)$/)?.[1] ?? 0);
+    })
+    .toBeGreaterThanOrEqual(width);
+}
+
+test("COLOR serves eight distinct high-resolution responsive angle frames", async ({
+  page,
+}, info) => {
+  test.skip(
+    info.project.name !== "desktop",
+    "Desktop sizes select the 640px-or-larger COLOR rendition",
+  );
+  await page.goto("/color?style=long-wolf&color=black");
+  const viewer = page.getByTestId("hair-viewer");
+  const image = viewer.locator("img").first();
+  const sources = new Set<string>();
+
+  for (let angle = 1; angle <= 8; angle++) {
+    const frame = String(angle).padStart(2, "0");
+    await page.getByRole("button", { name: `角度 ${angle}`, exact: true }).click();
+    await expect
+      .poll(() =>
+        image.evaluate((node) => {
+          const currentSrc = (node as HTMLImageElement).currentSrc;
+          return currentSrc ? new URL(currentSrc).pathname : "";
+        }),
+      )
+      .toContain(`/hair/black/${frame}-`);
+    await expectSourceWidthAtLeast(image, 640);
+    sources.add(
+      await image.evaluate((node) =>
+        new URL((node as HTMLImageElement).currentSrc).pathname,
+      ),
+    );
+  }
+
+  expect(sources.size).toBe(8);
+  const avifSet = await viewer
+    .locator('picture source[type="image/avif"]')
+    .first()
+    .getAttribute("srcset");
+  for (const width of [320, 480, 640, 768])
+    expect(avifSet).toContain(`-${width}.avif ${width}w`);
+});
+
 test("TRY is separate from selection, APPLY keeps angle, and comparison is keyboard accessible", async ({
   page,
 }, info) => {
@@ -13,14 +65,14 @@ test("TRY is separate from selection, APPLY keeps angle, and comparison is keybo
   await page.getByRole("button", { name: "SILVER", exact: true }).click();
   expect((await selection(page)).selectedColor).toBe("black");
   await expect(page.getByTestId("color-comparison")).toBeVisible();
+  const slider = page.getByRole("slider", {
+    name: "BEFORE / AFTER カラー比較",
+  });
+  await expect(slider).toBeVisible();
+  await slider.focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(slider).toHaveValue("51");
   if (info.project.name !== "desktop") {
-    const slider = page.getByRole("slider", {
-      name: "BEFORE / AFTER カラー比較",
-    });
-    await expect(slider).toBeVisible();
-    await slider.focus();
-    await page.keyboard.press("ArrowRight");
-    await expect(slider).toHaveValue("51");
     await slider.scrollIntoViewIfNeeded();
     const bounds = (await slider.boundingBox())!;
     const cdp = await page.context().newCDPSession(page);
@@ -44,6 +96,14 @@ test("TRY is separate from selection, APPLY keeps angle, and comparison is keybo
     expect(Number(await slider.inputValue())).toBeGreaterThan(65);
     expect((await selection(page)).selectedAngle).toBe(4);
   } else {
+    await expect(page.getByTestId("color-comparison")).toHaveAttribute(
+      "data-comparison",
+      "lens",
+    );
+    await expect(slider.locator("xpath=..")).toHaveAttribute(
+      "data-visual",
+      "veil",
+    );
     await expect(page.locator("canvas")).toHaveCount(1);
     const viewer = await page.getByTestId("hair-viewer").boundingBox();
     await page.mouse.move(
@@ -67,9 +127,26 @@ test("TRY is separate from selection, APPLY keeps angle, and comparison is keybo
   await page.getByRole("button", { name: "BOOK THIS LOOK" }).click();
   await expect(page.getByTestId("plan-summary")).toContainText("SILVER");
   await expect(page.locator("canvas")).toHaveCount(0);
+  const bookingImage = page.getByTestId("booking-image");
+  const bookingMinimum =
+    info.project.name === "mobile"
+      ? 640
+      : info.project.name === "tablet"
+        ? 320
+        : 480;
+  await expectSourceWidthAtLeast(bookingImage, bookingMinimum);
+  const bookingAvif = bookingImage
+    .locator("xpath=..")
+    .locator('source[type="image/avif"]');
+  await expect(bookingAvif).toHaveAttribute(
+    "sizes",
+    "(max-width:700px) 88vw, 30vw",
+  );
+  const bookingAvifSet = await bookingAvif.getAttribute("srcset");
+  expect(bookingAvifSet).toContain("-768.avif 768w");
   expect(errors).toEqual([]);
 });
-test("WebGL unavailable and reduced motion preserve the complete DOM flow", async ({
+test("WebGL unavailable preserves the complete DOM flow", async ({
   page,
 }) => {
   await page.addInitScript(() => {
@@ -83,7 +160,6 @@ test("WebGL unavailable and reduced motion preserve the complete DOM flow", asyn
       return Reflect.apply(original, this, [type, ...args]);
     } as typeof original;
   });
-  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/color?style=long-wolf&color=black");
   await page.getByRole("button", { name: "PINK", exact: true }).click();
   await expect(page.getByRole("slider")).toBeVisible();
@@ -95,6 +171,26 @@ test("WebGL unavailable and reduced motion preserve the complete DOM flow", asyn
   await expect(
     page.getByRole("textbox", { name: "生成した予約文" }),
   ).toHaveValue(/PINK/);
+});
+
+test("reduced motion keeps COLOR comparison in the complete DOM flow", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/color?style=long-wolf&color=black");
+  await page.getByRole("button", { name: "角度 5", exact: true }).click();
+  await page.getByRole("button", { name: "PINK", exact: true }).click();
+  await expect(page.getByTestId("color-comparison")).toHaveAttribute(
+    "data-comparison",
+    "slider",
+  );
+  await expect(
+    page.getByRole("slider", { name: "BEFORE / AFTER カラー比較" }),
+  ).toBeVisible();
+  await expect(page.locator("canvas")).toHaveCount(0);
+  await page.getByRole("button", { name: "APPLY PINK", exact: true }).click();
+  expect((await selection(page)).selectedColor).toBe("pink");
+  expect((await selection(page)).selectedAngle).toBe(4);
 });
 test("low hardware tier uses slider without image shaders", async ({
   page,
@@ -109,6 +205,35 @@ test("low hardware tier uses slider without image shaders", async ({
     "slider",
   );
   await expect(page.locator("canvas")).toHaveCount(0);
+});
+
+test("Save-Data keeps COLOR comparison in the complete DOM flow", async ({
+  page,
+}) => {
+  await page.addInitScript(() =>
+    Object.defineProperty(navigator, "connection", {
+      configurable: true,
+      value: {
+        saveData: true,
+        effectiveType: "4g",
+        addEventListener() {},
+        removeEventListener() {},
+      },
+    }),
+  );
+  await page.goto("/color?style=long-wolf&color=black");
+  await page.getByRole("button", { name: "SILVER", exact: true }).click();
+  await expect(page.getByTestId("color-comparison")).toHaveAttribute(
+    "data-comparison",
+    "slider",
+  );
+  await expect(
+    page.getByRole("slider", { name: "BEFORE / AFTER カラー比較" }),
+  ).toBeVisible();
+  await expect(page.locator("canvas")).toHaveCount(0);
+  expect((await selection(page)).selectedColor).toBe("black");
+  await page.getByRole("button", { name: "APPLY SILVER", exact: true }).click();
+  expect((await selection(page)).selectedColor).toBe("silver");
 });
 test("opening is skippable, once per session, and absent on deep links", async ({
   page,
@@ -174,6 +299,11 @@ test("repeated angle and candidate changes keep GPU textures bounded", async ({
       .getByRole("button", { name: i % 2 ? "PINK" : "SILVER", exact: true })
       .click();
   }
+  expect((await selection(page)).selectedColor).toBe("black");
+  expect((await selection(page)).selectedAngle).toBe(7);
+  await expect(
+    page.getByRole("button", { name: "SILVER", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
   await expect
     .poll(async () =>
       Number(await page.locator("canvas").getAttribute("data-textures")),
@@ -205,6 +335,8 @@ test("repeated angle and candidate changes keep GPU textures bounded", async ({
     "data-rendering",
     "active",
   );
+  await page.getByRole("button", { name: "BOOK THIS LOOK" }).click();
+  await expect(page.locator("canvas")).toHaveCount(0);
 });
 
 test("portrait particles form before the photo, and the opening can replay", async ({ page }, info) => {

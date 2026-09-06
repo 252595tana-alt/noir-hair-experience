@@ -35,7 +35,7 @@ Google Driveなどシンボリックリンクに制限がある場所でも利�
 - HERO：同一モデルの8方向ターンテーブル、粒子形成、淡い光、短い「BE YOU.」のコピー。人物を直接ドラッグ／スワイプして回転可能。
 - STYLE：8スタイル、矢印・左右スワイプ・矢印キー、GSAPによる切替。
 - 360°：TOPとSTYLEのどちらも8方向。TOPは隣接フレームを混ぜて滑らかに表示し、リリース時は短い慣性で45°単位へスナップ。マウス・タッチ・左右キー・Homeキーに対応し、角度を共通stateへ保持。
-- COLOR：8色。候補をTRYで比較し、APPLYで `selectedColor` と料金を更新。`selectedAngle` は維持。
+- COLOR：8色×8方向の768×1024pxフレーム。候補をTRYするとSilk Color Veilで毛流れに沿って比較し、APPLYで `selectedColor` と料金を更新。`selectedAngle` は維持。
 - STYLIST：3名、得意分野、担当スタイル、指名予約。未設定のInstagramは準備中表示。
 - MENU：6メニュー。スタイル・カラーのおすすめ施術とOPTIONを分け、料金・時間・指名料を自動計算。
 - BOOKING：スタイル・カラー・担当・メニュー・金額・時間を表示。相談プランへ切替しても元の選択を保持。
@@ -89,6 +89,7 @@ src/
     menu.ts                    料金・所要時間・見積もり計算
   lib/
     constants.ts               モード・URL・角度数・ドラッグ間隔
+    hairAssets.ts              COLOR画像のresponsive/GPU幅選択
     navigation.ts              モード遷移・SALON開閉
     preload.ts                 重複を避けた近接画像の先読み
     useMotion.ts               GSAP・reduced motion
@@ -96,8 +97,11 @@ public/
   images/hero.png               旧HERO／CONCEPT用の生成モデル写真
   images/hero-360/              TOP用の同一モデル8方向sprite・正面画像
   images/styles-v2/             8 STYLE固有の1024×1536px代表写真
-  hair/{color}/01.webp–08.webp  8方向×8色、64枚のデモ画像
+  hair/{color}/01.webp–08.webp  8方向×8色、768×1024pxの64枚
+assets/
+  color-turnarounds/*.webp      8色の4列×2行AI生成マスター（1536×1024px）
 scripts/
+  prepare-color-assets.mjs      マスター分割・COLOR variant・manifest生成
   generate-hair.mjs             オリジナルSVGからWebPデモ素材を再生成
   inspect-browser.mjs           ローカル表示・コンソールの診断
   check-production.mjs          本番スモーク・縦スワイプ・320px・フォールバック
@@ -125,7 +129,7 @@ STYLE COLLECTIONの代表写真は `public/images/styles-v2/` にLONG / WOLF / P
 
 代表写真を再制作する際は `styles-v3` のような新しいversionedディレクトリへ配置し、`styles.ts` とOG出力名を更新します。公開済みURLのブラウザ・SNSキャッシュに旧画像を残さないためです。
 
-STYLE画面の360°用64枚は、提供された `hair_color_variations_64_images.zip` の8色×8方向のモデル画像です。TOPとは別モデルです。元画像は140〜141×125〜126px。一部に含まれる隣の行・白い区切り線を除去して共通の高さ100pxで切り出し、ロスレスWebPに変換しています。元ZIPは変更していません。元画像に起因する色間の構図差・拡大時の粗さは残ります。360° / COLOR / BOOKINGは現在この共通シーケンスを参照します。
+STYLE画面の360°、COLOR、BOOKINGは、TOPとは別モデルの共通8色×8方向シーケンスを参照します。現在の表示用フレームは `assets/color-turnarounds/` のAI生成マスター8点から作成した768×1024pxです。旧 `hair_color_variations_64_images.zip` は置換前の参考原本として保持しますが、140〜141px幅だった旧フレームは表示に使用しません。
 
 TOPは `public/images/hero-360/turntable-v2.avif` / `.webp` の4列×2行spriteを使用します。順序は正面、右斜め前、右側面、右斜め後ろ、背面、左斜め後ろ、左側面、左斜め前です。差し替える場合は各マスを同じ正方形、人物の中心・大きさ・照明・衣装を固定してください。`front-v2.webp` はOpening粒子の生成元なので、正面を差し替えた後に `pnpm assets:particles` を実行します。
 
@@ -153,19 +157,19 @@ public/hair/pink/01.webp ... 08.webp
 | 07.webp | 6 | 横 / 270° |
 | 08.webp | 7 | 斜め / 315° |
 
-全カラーで同じモデル・カメラ位置・向き・切り抜き位置に統一してください。推奨は600×800以上の同一寸法。CONCEPT画像は `public/images/hero.png`、代表写真は `public/images/styles-v2/` と `src/data/styles.ts` の `image` / `position` を編集します。代表写真更新後は `pnpm assets:production` でSTYLE別OGも再生成します。
+全カラーで同じモデル・カメラ位置・向き・切り抜き位置に統一してください。COLORマスターは1536×1024pxの4列×2行、順序は上表の01〜08です。各セルは約378〜379×504pxで、生成処理がLanczos3と軽いsharpenを使って768×1024pxへ正規化します。768×1024pxでネイティブ撮影された素材という意味ではありません。CONCEPT画像は `public/images/hero.png`、代表写真は `public/images/styles-v2/` と `src/data/styles.ts` の `image` / `position` を編集します。代表写真更新後は `pnpm assets:production` でSTYLE別OGも再生成します。
 
-パスや拡張子を変える場合は `src/data/hairStyles.ts` を編集します。提供画像は `pnpm assets:import <展開済みhair_color_variations_64フォルダ>` で取り込み直せます。元のマネキン生成は `pnpm assets:demo` に残していますが、提供画像を上書きするため通常は実行しません。
+COLORを再生成する場合は `assets/color-turnarounds/{color}.webp` を差し替え、リポジトリ直下で `pnpm assets:color` を実行します。スクリプトはマスター寸法を検証し、固定4×2セルを分割して `public/hair/{color}/01.webp`〜`08.webp`、320 / 480 / 640 / 768pxのAVIF・WebP・JPEG、64件の `src/data/imageManifest.json` を再生成します。パスや色IDを変える場合は `src/data/hairStyles.ts` とスクリプト側の一覧も更新してください。
 
 ## 読み込みとアニメーション
 
-STYLE用64枚は一括ロードしません。現在のSTYLE・COLOR・ANGLEの画像を優先表示し、同色の前後1枚だけを先読みします。COLOR UIがある時だけ、使用可能な次の色の現在角度を1枚先読みします。TOPは8方向をまとめた約77KBのAVIF spriteを優先取得し、WebPへフォールバックします。画像領域の寸法は固定し、STYLE画像欠落時は共通の `public/images/placeholder.svg` を表示します。
+STYLE用64枚は一括ロードしません。現在のSTYLE・COLOR・ANGLEのresponsive画像を優先表示し、同色の前後1枚だけを端末Tierに合う幅で先読みします。COLOR UIがある時だけ、使用可能な次の色の現在角度を1枚先読みします。DOMは320 / 480 / 640 / 768pxのAVIF・WebP・JPEGから選び、WebGL TextureはHigh 768px、Medium 640pxに制限します。Low TierはCanvasを使わず、DOM表示と先読みを最大480px相当に抑えます。TOPは8方向をまとめたAVIF spriteを優先取得し、WebPへフォールバックします。画像欠落時は共通の `public/images/placeholder.svg` を表示します。
 
 カラー変更はopacity / blur / scaleで500ms、スタイル変更はopacity / x / scaleで500ms、モード変更は650ms。常時ループするアニメーションはありません。ドラッグ時の角度更新は即時です。
 
 ## WebGLとDOMの境界
 
-描画の境界は `HairViewer/HairViewer.tsx` の画像領域です。DOM画像を常に残し、その上に `ColorComparison` の局所Canvasを重ねます。STYLEは `StyleFlow`、HEROは `HeroEffects` が担当します。
+描画の境界は `HairViewer/HairViewer.tsx` の画像領域です。responsiveなDOM画像を常に残し、その上に `ColorComparison` の局所Canvasを重ねます。COLORのSilk Color Veilは比較候補がある時だけ描画し、STYLEは `StyleFlow`、HEROは `HeroEffects` が担当します。
 
 ```ts
 type HairRendererProps = {
@@ -177,7 +181,7 @@ type HairRendererProps = {
 
 Zustand・ナビ・カラーパレット・プラン・予約・SALONはDOM側に残します。WebGL側はこの状態を購読して描画し、角度変更は既存の `setAngle` に返します。コンテキスト消失や低性能端末では画像レンダラーに戻せるようにします。
 
-`style.hairImages[color][angle]` はスタイル別に差し替え可能です。Particle・GLSL Lens・Hair FlowをPhase 3で実装しました。実3D頭部モデル・予約APIは未接続です。WebGLから価格や推奨メニューを直接変更せず、既存のStoreアクションへ入力します。
+`style.hairImages[color][angle]` はスタイル別に差し替え可能です。Particle・Silk Color Veil・Hair FlowをWebGLで実装しています。実3D頭部モデル・予約APIは未接続です。WebGLから価格や推奨メニューを直接変更せず、既存のStoreアクションへ入力します。
 
 ## Hair Unwoven Gallery
 
@@ -395,8 +399,8 @@ BOOKINGで生成文を確認・コピーできます。URLが設定されてい�
 | `ParticleHead/particleHead.frag` | 小さなソフト粒子。selectedColorに応じて控えめに色を変える |
 | `HeroEffects.tsx` | 初回セッションのOpening、SKIP、写真ready後のクロスフェード、PC最大8px/6pxの移動 |
 | `AmbientParticles` | 同じ粒子実装を少数・低opacityで再利用。Opening中と同時にCanvasを増やさない |
-| `ColorComparison.tsx` | CURRENT / TRY比較。PCはLens、タッチ端末・Low・失敗時はDOMスライダー |
-| `HairLens/hairLens.frag` | uCurrentTexture / uTryTexture、uMouse、uRadiusでレンズマスク。ごく小さい境界屈折と白いハイライト |
+| `ColorComparison.tsx` | CURRENT / TRY比較。PCはSilk Color Veilとキーボード対応rangeを併用し、タッチ端末・Low・Save-Data・失敗時はDOMスライダー |
+| `HairLens/hairLens.frag` | 2枚の色差から髪領域を推定し、毛流れ状の境界、微細な屈折、カラー別の艶、850msのAPPLY浸透を描画 |
 | `HairTransition/transition.frag` | uTexture1 / uTexture2、uProgress / uDirection / uResolutionによる750msの髪の流れ。顔中央の歪みを抑制 |
 | `LightSweep/LightSweep.tsx` | DOM fallbackの850ms CSSスイープ。GPUレンズではhairLens.fragのuSweepが同じ一度の光を担当 |
 | `shaders/plane.vert` | 比較・遷移共通のスクリーンUV。`noise.glsl` は微小な流れ、`utils.glsl` は画像のcontain/cover計算 |
@@ -416,8 +420,8 @@ ShaderはReact内の長い文字列にせず `.vert` / `.frag` / `.glsl` を正�
 
 | Tier | DPR上限 | Opening粒子 | 比較 / STYLE |
 |---|---|---|---|
-| High | 1.5 | PC 6,000 | full lens / 750ms flow |
-| Medium | 1.25 | PC 3,000 / Mobile 700 | noise 40% / 軽いflow。タッチ端末はDOM比較 |
+| High | 1.5 | PC 6,000 | 768px Texture / Silk Color Veil / 750ms STYLE flow |
+| Medium | 1.25 | PC 3,000 / Mobile 700 | 640px Texture / noise 40%。タッチ端末はDOM比較 |
 | Low | 1 | PC 1,000 / Mobile 400 | DOM before/after / GSAP crossfade |
 
 人物形成の完了後はOpening Canvasを破棄します。Postprocessing・Bloomは写真の色と軽さを優先して全Tierで省略しています。初期判定はCPU論理コア・画面サイズ・DPR・pointer種別。2コア以下はLow、タッチ端末・8コア未満・大きなpixel budgetはMedium、それ以外はHigh。
@@ -436,17 +440,23 @@ document.hidden、IntersectionObserverで画面外、SALON表示中はR3Fのfram
 - reduced-motion：粒子とHERO移動なし、レンズ歪みなし、画像の短い切替、Light Sweepなし。
 - BOOKING / MENU / SALONはDOM中心。WebGLエラーを予約のエラーへ伝播させない。
 
+### COLOR高解像度化とSilk Color Veil
+
+COLORの比較元と候補は同じANGLEの画像を使用します。PCのfine pointerかつHigh / Medium Tierでは、円形の単純な切替ではなく、2画像の色差から髪らしい領域を推定し、細い繊維状の境界で候補色を見せます。マウスは弱く追従し、rangeをキーボードで動かした場合も同じ境界位置へ同期します。APPLYでは850msで色が毛流れに沿って浸透し、最後は候補画像へ完全に収束します。Canvasと比較画像は操作を受け取らず、色確定、ANGLE、料金、MENU、URL、予約は既存のDOMとStoreが管理します。
+
+タッチ端末、Low Tier、Save-Data、Reduced Motion、WebGL2非対応、Texture読込失敗、context lossではCanvasを使わずDOM rangeへ切り替えます。TRYだけでは `selectedColor` を変更せず、APPLY時に先に状態を確定するため、演出中にBOOKへ進んでも予約内容は最新です。
+
 ### GPU Texture管理
 
-Phase 4では `TextureManager.ts` と `lib/resourceCache.ts` が現在・候補の2枚を保護し、直近の画像を含めて最大4枚を保持します。再利用時はロードを省略。上限を超えた未使用画像、遅れて完了した不要ロード、アンマウント時の全画像をdisposeします。全64枚のGPU常駐や無制限cacheは使いません。Canvasの `data-textures` を反復操作の回帰テストに使用します。
+`TextureManager.ts` と `lib/resourceCache.ts` が現在・候補の2枚を保護し、直近の画像を含めて最大4枚を保持します。`lib/hairAssets.ts` がHigh / Medium Tierへ768 / 640pxのWebPを渡し、canonical原本を無条件に送信しません。Low TierではCanvasを作らず、480pxのvariantをDOM表示や先読みに使用します。再利用時はロードを省略し、上限を超えた未使用画像、遅れて完了した不要ロード、アンマウント時の全画像をdisposeします。全64枚のGPU常駐や無制限cacheは使いません。Canvasの `data-textures` を反復操作の回帰テストに使用します。
 
-### 提供された64枚の扱い
+### 旧提供64枚と現在のCOLOR素材
 
-silver_white → silver、ash_gray → ash、blond → blonde、dark_brown → dark-brown、milk_tea_beige → beige、red → red、blue_black → black、pink → pink。01正面、02右斜め前、03右側面、04右斜め後、05背面、06左斜め後、07左側面、08左斜め前の順です。取り込み処理・クロップ値は `scripts/import-hair-assets.mjs` に明記。髪の色を生成し直す処理や高解像度の捏造は行っていません。
+色IDはsilver、ash、blonde、dark-brown、beige、red、black、pink。01正面、02右斜め前、03右側面、04右斜め後、05背面、06左斜め後、07左側面、08左斜め前の順です。現在の8マスターはAI生成素材で、各4×2シートをソース管理しています。旧ZIPを単純拡大した素材ではありません。ただしマスターの各セルは約378〜379×504pxであり、canonical 768×1024pxは決定的なリサイズとsharpenを含みます。実写のネイティブ768×1024pxディテールとは区別してください。
 
 ### Phase 4で改善する点
 
-1. STYLE代表写真8点は高解像度化済み。360° / COLOR / BOOKINGをSTYLE別にする場合は、実作品ごとに同一カメラ・照明・位置で撮影した8方向×使用可能色を用意し、現在の共通シーケンスを置き換える。
+1. STYLE代表写真8点と共通COLORシーケンスは高解像度表示へ更新済み。360° / COLOR / BOOKINGをSTYLE別にする場合は、実作品ごとに同一カメラ・照明・位置で撮影した8方向×使用可能色を用意し、現在の共通シーケンスを置き換える。
 2. TOP人物形成は写真からの点群へ置換済み。今後、本物の3D回転が必要な場合はGLBと髪領域マスクを用意する。
 3. 実機iPhone Safariで長時間操作・メモリ圧迫・タブ復帰を計測する。今回のモバイル検証はChromeのタッチ端末エミュレーションであり、実機Safari確認の代替ではない。
 4. 端末別の実測からFPS閾値・画像解像度・Tier判定を調整。必要になった時だけ圧縮GPU textureや軽いpostprocessingを検討する。

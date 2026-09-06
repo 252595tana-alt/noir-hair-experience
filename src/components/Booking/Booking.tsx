@@ -5,7 +5,7 @@ import { styleById } from "@/data/styles";
 import { colorById } from "@/data/hairStyles";
 import { createBookingMessage } from "@/lib/createBookingMessage";
 import { go } from "@/lib/navigation";
-import { SafeImage } from "../ui/SafeImage";
+import { HairImage } from "../ui/HairImage";
 import { Modal } from "../ui/Modal";
 import { PlanSummary } from "../MenuPlan/PlanSummary";
 import { ResetSelection } from "../ResetSelection/ResetSelection";
@@ -42,15 +42,13 @@ export function Booking() {
           {style && (
             <figure className={s.bookingLook}>
               <div>
-                <SafeImage
+                <HairImage
                   src={
                     style.hairImages[state.selectedColor]?.[
                       state.selectedAngle
                     ] ?? "/images/placeholder.svg"
                   }
                   alt={style.name + " / " + colorById(state.selectedColor).name}
-                  fill
-                  unoptimized
                   sizes="(max-width:700px) 88vw, 30vw"
                   data-testid="booking-image"
                 />
