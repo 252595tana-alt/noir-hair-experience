@@ -302,6 +302,7 @@ test("leaving the gallery removes its canvas and listeners without changing the 
   await expect(page.locator("main")).toHaveAttribute("data-mode", "home");
   await expect(gallery(page)).toHaveCount(1);
   await gallery(page).scrollIntoViewIfNeeded();
+  await expect(gallery(page)).toHaveAttribute("data-current-style", work.id);
   await step(gallery(page), 1);
   expect(await savedSelection(page)).toEqual(before);
   expect(errors).toEqual([]);

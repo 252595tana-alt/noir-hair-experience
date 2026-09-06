@@ -41,6 +41,18 @@ type GalleryState = {
 const wrap = (index: number) =>
   (index + hairUnwovenStyles.length) % hairUnwovenStyles.length;
 
+const indexForSelection = (
+  editorialStyleId: string | null,
+  selectedStyleId: string | null,
+) => {
+  const index = hairUnwovenStyles.findIndex(
+    (style) =>
+      style.id === editorialStyleId ||
+      (!editorialStyleId && style.styleId === selectedStyleId),
+  );
+  return index < 0 ? 0 : index;
+};
+
 export function HairUnwovenGallery() {
   const root = useRef<HTMLElement>(null);
   const pointer = useRef({ x: 0, y: 0 });
@@ -64,14 +76,21 @@ export function HairUnwovenGallery() {
   );
   const [canvasReady, setCanvasReady] = useState(false);
   const [webglFailed, setWebglFailed] = useState(false);
-  const [gallery, setGallery] = useState<GalleryState>({
-    currentIndex: 0,
-    nextIndex: 0,
-    direction: 1,
-    transitionId: 0,
-    isTransitioning: false,
-    engine: "idle",
-    queuedDirection: null,
+  const [gallery, setGallery] = useState<GalleryState>(() => {
+    const state = useSiteStore.getState();
+    const selectedIndex = indexForSelection(
+      state.editorialStyleId,
+      state.selectedStyleId,
+    );
+    return {
+      currentIndex: selectedIndex,
+      nextIndex: selectedIndex,
+      direction: 1,
+      transitionId: 0,
+      isTransitioning: false,
+      engine: "idle",
+      queuedDirection: null,
+    };
   });
   const reducedMotion = useReducedMotion();
   const reducedData = useReducedData();
@@ -79,6 +98,33 @@ export function HairUnwovenGallery() {
   const tier = usePerformanceTier((state) => state.tier);
   const initialized = usePerformanceTier((state) => state.initialized);
   const salonOpen = useSiteStore((state) => state.salonOpen);
+
+  useEffect(
+    () =>
+      useSiteStore.subscribe((state, previous) => {
+        if (
+          state.editorialStyleId === previous.editorialStyleId &&
+          state.selectedStyleId === previous.selectedStyleId
+        )
+          return;
+        const selectedIndex = indexForSelection(
+          state.editorialStyleId,
+          state.selectedStyleId,
+        );
+        setGallery((current) =>
+          current.isTransitioning || current.currentIndex === selectedIndex
+            ? current
+            : {
+                ...current,
+                currentIndex: selectedIndex,
+                nextIndex: selectedIndex,
+                queuedDirection: null,
+                engine: "idle",
+              },
+        );
+      }),
+    [],
+  );
 
   const shouldRenderWebGL =
     nearby &&

@@ -224,7 +224,7 @@ GSAPが`power2.inOut`で進行度を駆動し、Highは1.42秒、Mediumは1.24�
 
 PREVIOUS／NEXT、左右キー、横ドラッグ・スワイプ、wheelで作品を切り替えます。遷移中の追加操作は、最新方向1件だけをqueueに保持し、現在の遷移完了後に開始します。操作ごとにGeometryやGSAPを積み増しません。タッチ領域は`touch-action: pan-y`で、縦スワイプによるページスクロールを維持します。
 
-Gallery内の鑑賞操作では予約Storeを変更しません。VIEWで`setStyle(styleId)`→`setViewerOpen(false)`→`go("style")`を実行し、`/style/{slug}`の代表写真へ移動します。BOOKは既存STYLEとの対応を`setStyle(styleId)`で反映した後、`setEditorialStyle(id)`→`go("booking")`で現在表示中の編集名も渡します。たとえばWAVEは施術計算上のPERMへ接続しつつ、BOOKING表示と予約文にはWAVEとして残ります。担当者・推奨施術・概算価格・時間が反映され、利用可能な選択カラー、ANGLE、OPTIONは既存ルールで維持します。非対応カラーは対象STYLEのdefaultColorへ変更します。
+Gallery内の鑑賞操作では予約Storeを変更しません。VIEWで`setStyle(styleId)`→`setViewerOpen(false)`→`go("style")`を実行し、`/style/{slug}`の代表写真へ移動します。BOOKは既存STYLEとの対応を`setStyle(styleId)`で反映した後、`setEditorialStyle(id)`→`go("booking")`で現在表示中の編集名も渡します。たとえばWAVEは施術計算上のPERMへ接続しつつ、BOOKING表示と予約文にはWAVEとして残ります。Browser BackやHOME再表示時も、この編集名または既存STYLEとの対応からGalleryの作品位置を復元します。担当者・推奨施術・概算価格・時間が反映され、利用可能な選択カラー、ANGLE、OPTIONは既存ルールで維持します。非対応カラーは対象STYLEのdefaultColorへ変更します。
 
 ### FallbackとTexture管理
 
