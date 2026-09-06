@@ -21,7 +21,7 @@ export const hairUnwovenStyles: readonly HairUnwovenStyle[] = [
     title: "STRAIGHT",
     image: "/images/styles-v2/long.webp",
     description: "Smooth and minimal.",
-    focusY: 0.68,
+    focusY: 0.86,
   },
   {
     id: "wave",
@@ -29,7 +29,7 @@ export const hairUnwovenStyles: readonly HairUnwovenStyle[] = [
     title: "WAVE",
     image: "/images/styles-v2/perm.webp",
     description: "Soft movement and texture.",
-    focusY: 0.68,
+    focusY: 0.86,
   },
   {
     id: "bob",
@@ -37,7 +37,7 @@ export const hairUnwovenStyles: readonly HairUnwovenStyle[] = [
     title: "BOB",
     image: "/images/styles-v2/bob.webp",
     description: "Sharp silhouette.",
-    focusY: 0.67,
+    focusY: 0.86,
   },
   {
     id: "long",
@@ -45,7 +45,7 @@ export const hairUnwovenStyles: readonly HairUnwovenStyle[] = [
     title: "LONG",
     image: "/images/styles-v2/layer.webp",
     description: "Natural flow.",
-    focusY: 0.68,
+    focusY: 0.86,
   },
 ] as const;
 
