@@ -183,9 +183,95 @@ Zustand・ナビ・カラーパレット・プラン・予約・SALONはDOM側�
 
 `style.hairImages[color][angle]` はスタイル別に差し替え可能です。Particle・Silk Color Veil・Hair FlowをWebGLで実装しています。実3D頭部モデル・予約APIは未接続です。WebGLから価格や推奨メニューを直接変更せず、既存のStoreアクションへ入力します。
 
+## Cinematic Hair Journey
+
+HOMEへ「美容室で髪が変わる過程」を1本の髪の束で見せる`02 / CINEMATIC JOURNEY`スクロールストーリーを追加しました。配置は`HERO → Cinematic Hair Journey → Hair Unwoven Gallery`です。既存のSTYLE／COLOR／MENU／BOOKINGは変更せず、JourneyのFINALだけを既存の選択Storeと予約導線へ接続します。Canvas、各Chapterの文字、Progress、CTAは分離し、WebGLが使えない場合も施術内容と予約操作をDOMで利用できます。新しいdependencyは追加していません。
+
+### 6 Chapterとデータ
+
+Chapter、区間、コピー、背景色、COLOR stop、FINALの予約対象は`src/data/hairJourney.ts`に集約しています。画面側やShader内へ予約IDを分散させていません。
+
+| 進捗 | Chapter | 表現 |
+|---|---|---|
+| 0.00–0.12 | 00 INTRO | 黒い髪の束が呼吸するように揺れ、表面の光が静かに移動 |
+| 0.12–0.30 | 01 CUT | `uCutProgress`で根元側を残して毛先側だけを短くし、少量の切れ毛Particleを表示 |
+| 0.30–0.48 | 02 COLOR | BLACK → DARK BROWN → ASH → ASH BEIGEを連続補間し、色名も同じ進捗から更新 |
+| 0.48–0.66 | 03 TREATMENT | gloss、specular power、Fresnel、縦方向のLight Sweepを強め、健康的な艶へ変化 |
+| 0.66–0.84 | 04 STYLING | 複数のsin波と微細な揺らぎを混ぜ、STRAIGHTから柔らかなWAVEへ変形 |
+| 0.84–1.00 | 05 FINAL STYLE | 1本のHair Ribbonを薄く広げ、複数RibbonへほどいてASH WAVEの写真へ整列 |
+
+FINALは既存データ上の`styleId=perm`、`selectedColor=ash`、`editorialStyleId=wave`へ対応します。VIEW STYLEはこの3値をStoreへ反映して`/style/perm`へ、BOOK THIS STYLEは同じ選択を反映して`/booking`へ進みます。PERMの担当者・推奨MENU・概算料金・時間は既存の選択計算から取得し、Journey内では再計算しません。編集名のWAVEはBOOKING表示と予約文へ保持されます。
+
+### ScrollTriggerとDOM同期
+
+`CinematicHairJourney.tsx`がScrollTriggerを所有し、0〜1の進捗を`progressRef`へ保存します。毎フレームReact stateを変更せず、Canvasのuniform、Chapterのopacity／translateY／blur、背景、COLOR名、Progress Bar、FINAL CTAへ同じ値を渡します。React stateを更新するのはChapter境界を通過した時だけです。
+
+Desktopはセクション内のstageをpinし、画面高の約4.35倍を`scrub: 0.85`で進めます。Mobile／Tabletは300svhの短い領域でCSS stickyを使い、ScrollTriggerのpinを作りません。横方向のジェスチャーを奪わず、通常の縦スクロールで最後まで通過できます。pointer位置はrefへ正規化し、Hair Ribbonへ弱く反映します。
+
+Chapter文字、Progress、CTAはDOMです。非表示Chapterは`aria-hidden`、現在の進行項目は`aria-current="step"`を使います。FINAL CTAはモバイル下部ナビゲーションとsafe areaを避けた位置に置き、静止fallbackでもキーボード操作できます。
+
+### Geometry・Shader・カメラ
+
+中心の髪は1枚の`BufferGeometry`と`ShaderMaterial`で描き、geometryやmaterialをフレームごとに作りません。CUT用Particleも1つの`Points`へまとめています。FINALの細い帯はHair Unwoven Galleryの`createRibbonGeometry`を再利用し、RibbonごとのReact Componentを作りません。
+
+主なuniformは次のとおりです。
+
+| uniform | 用途 |
+|---|---|
+| `uTime` / `uMouse` | 呼吸、毛流れ、弱いpointer追従 |
+| `uScrollProgress` | Canvas全体で共有する0〜1のStory進捗 |
+| `uCutProgress` | 毛先のclip位置、切断面の短い反射、切れ毛の出現 |
+| `uColorProgress` | 4つのBase ColorとHighlight Colorの補間 |
+| `uTreatmentProgress` | gloss、specular、rim、Light Sweepの強度 |
+| `uStyleProgress` / `uWaveStrength` | STRAIGHTからWAVEへの有機的な形状変化 |
+| `uFinalProgress` | Hair Ribbonの退場と写真Ribbonの整列 |
+| `uQuality` | Tier別のstrand detailと変位量 |
+
+Fragment Shader内でKey／Soft Fill／Rim相当の方向光、Fresnel、specularを計算します。独立した重いpostprocessingやBloomは追加していません。カメラはCUTで近づき、COLORで横へ移り、TREATMENTでrimが見える位置へ寄り、STYLINGで全体を見せ、FINALで正面へ戻ります。Scroll進捗から目標位置を決め、`useFrame`内ではVectorを再生成せず緩やかに補間します。
+
+### Hair Unwoven Galleryとの共通化
+
+- FINALのRibbon geometryは`src/three/HairLoom/ribbonGeometry.ts`の`createRibbonGeometry`を利用します。
+- 写真Textureは共通`TextureManager.ts`の`useManagedTextures`から取得し、同じcache・参照管理・dispose規則を使います。
+- Canvas境界、context loss、frame loop停止は共通`WebGLExperience.tsx`を利用します。
+- `usePerformanceTier`、`useReducedMotion`、`useReducedData`、`useWebGLSupport`を既存の判定元として利用します。
+- `.vert`／`.frag`を正本として`pnpm shaders`で`shaders.generated.ts`を作る既存方式を維持します。
+
+Hair Unwoven Gallery本体の作品切替やShaderは変更していません。Journeyが画面外へ抜けてCanvasを破棄してから次のGalleryを表示するため、2つのWebGL contextを長時間同時保持しません。Gallery見出しはHOME内の順番に合わせて次の番号へ繰り下げています。
+
+### Desktop・Mobile・静止fallback
+
+| 描画 | Hair geometry | CUT Particle | FINAL Ribbon | 更新上限 |
+|---|---:|---:|---:|---:|
+| Desktop High | 112×7 segments | 48 | 52本×22 segments | 60FPS / DPR 1.5 |
+| Desktop Medium | 76×5 segments | 28 | 36本×16 segments | 60FPS / DPR 1.25 |
+| Mobile / Tablet | 44×3 segments | 14 | 24本×12 segments | 45FPS / DPR 1.25 |
+
+Reduced Motion、Save-Data、Low Tier、WebGL2非対応、Shader／Texture／context失敗時はCanvasと長いpinを使いません。FINAL写真、INTROを含む全6 Chapter、4色の推移、VIEW／BOOKを通常のDOMへ表示します。情報や予約導線は失われません。
+
+IntersectionObserverはセクション前後85%の範囲だけCanvasをmountします。通過後はunmountし、再入場時はready状態から作り直します。画面外、非表示タブ、SALON表示中はframe loopを止めます。Hair、Particle、FINAL Ribbonのgeometryはunmount時にdisposeし、共通Texture管理も参照をreleaseします。ScrollTriggerとGSAP contextも画面遷移時にrevertし、pin spacerを残しません。
+
+### 追加・修正ファイルとテスト
+
+- Section／DOM：`src/components/sections/CinematicHairJourney.tsx`、`CinematicHairJourney.module.css`
+- UI：`src/components/ui/HairJourneyChapter.tsx`、`HairJourneyProgress.tsx`、`HairJourneyCTA.tsx`
+- データ：`src/data/hairJourney.ts`
+- WebGL：`src/three/CinematicHairJourney/`以下のCanvas、Scene、Hair Ribbon、CUT Particle、FINAL Threads、geometry、progress関数、6 Shader
+- 統合：`src/components/Experience.tsx`、`src/components/sections/HairUnwovenGallery.tsx`
+- Shader生成：`scripts/build-shaders.mjs`、`src/three/shaders.generated.ts`
+- 回帰テスト：`tests/cinematic-hair-journey.spec.ts`、`playwright.config.ts`
+
+Journeyだけを確認する場合は、開発サーバーを起動して次を実行します。
+
+```sh
+pnpm exec playwright test tests/cinematic-hair-journey.spec.ts
+```
+
+Desktopの全Chapter、FINALのVIEW／BOOKとCanvas／pin cleanup、Mobile／Tabletの軽量geometryと非pin、Reduced Motionの静止表示を確認します。今回のJourney専用結果は10成功・5対象外・失敗0です。TypeScript、ESLint、本番buildも成功しています。Safari、iPhone、Androidの実機確認は未実施です。
+
 ## Hair Unwoven Gallery
 
-HOMEのHERO直下に、写真が横方向の細いリボンへほどけ、次の写真へ組み上がる4作品のGalleryを追加しました。HEROとは独立した通常の縦スクロール領域で、既存のSTYLE一覧・詳細・COLOR・BOOKINGはそのまま利用できます。見出し、写真、作品情報、VIEW／BOOKはDOMに残し、Galleryが画面に近づいた時だけ装飾用Canvasをdynamic importします。新しいmodeやURLは追加していません。
+HOMEのCinematic Hair Journey直下に、写真が横方向の細いリボンへほどけ、次の写真へ組み上がる4作品のGalleryを追加しました。HEROとは独立した通常の縦スクロール領域で、既存のSTYLE一覧・詳細・COLOR・BOOKINGはそのまま利用できます。見出し、写真、作品情報、VIEW／BOOKはDOMに残し、Galleryが画面に近づいた時だけ装飾用Canvasをdynamic importします。新しいmodeやURLは追加していません。
 
 ### 4作品のデータと画像変更
 

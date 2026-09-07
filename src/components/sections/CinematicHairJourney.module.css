@@ -1,0 +1,604 @@
+.journey {
+  --journey-progress: 0;
+  --journey-progress-width: 0%;
+  --journey-final-progress: 0;
+  --journey-final-scale: 1.025;
+  --journey-skew: 0deg;
+  --journey-mobile-skew: 0deg;
+  --journey-cut: 0%;
+  --journey-saturation: 0.7;
+  --journey-sweep: -100.8%;
+  --journey-sweep-opacity: 0;
+  --journey-cue-opacity: 1;
+  position: relative;
+  min-height: 100svh;
+  isolation: isolate;
+  background: #080808;
+  color: #f4f3ef;
+}
+
+.sticky {
+  position: relative;
+  width: 100%;
+  max-width: 100vw;
+  height: 100svh;
+  min-height: 620px;
+  overflow: hidden;
+  background: #080808;
+  isolation: isolate;
+}
+
+/* ScrollTrigger writes the capture-time pixel width inline. Keep the pinned
+   stage inside the live viewport while a desktop window is being resized. */
+.journey :global(.pin-spacer) {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: clip;
+}
+
+.journey :global(.pin-spacer) > .sticky {
+  width: 100% !important;
+  max-width: 100vw !important;
+}
+
+.eyebrow {
+  position: absolute;
+  z-index: 8;
+  top: clamp(72px, 8vw, 112px);
+  left: clamp(22px, 6vw, 92px);
+  font-size: 8px;
+  line-height: 1.7;
+  letter-spacing: 0.2em;
+  color: #a5a39e;
+}
+
+.visual {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.visual * {
+  pointer-events: none;
+}
+
+.fallbackRibbon {
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  top: 50%;
+  width: clamp(54px, 6vw, 92px);
+  height: min(68svh, 700px);
+  border-radius: 52% 48% 46% 54% / 3% 4% 5% 4%;
+  transform: translate(-50%, -48%) rotate(-3deg)
+    skewX(var(--journey-skew));
+  transform-origin: 50% 12%;
+  background:
+    linear-gradient(90deg, #020203 0%, #1d1c1f 22%, #5f5d5d 46%, #181719 61%, #030304 100%);
+  box-shadow:
+    0 0 82px #c7c0b118,
+    inset 9px 0 20px #ffffff0b,
+    inset -16px 0 28px #000000b8;
+  opacity: calc(1 - var(--journey-final-progress));
+  clip-path: inset(0 0 var(--journey-cut) 0 round 50% 50% 46% 54%);
+  filter: saturate(var(--journey-saturation));
+}
+
+.fallbackRibbon::before,
+.fallbackRibbon::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.fallbackRibbon::before {
+  background: linear-gradient(105deg, transparent 38%, #fff4 47%, transparent 55%);
+  transform: translateX(var(--journey-sweep));
+  opacity: var(--journey-sweep-opacity);
+}
+
+.fallbackRibbon::after {
+  border-left: 1px solid #f3eee530;
+  border-right: 1px solid #020203;
+}
+
+.journey[data-renderer="webgl"] .fallbackRibbon {
+  opacity: 0;
+}
+
+.finalPhoto {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: var(--journey-final-progress);
+  transform: scale(var(--journey-final-scale));
+  filter: saturate(0.86) contrast(1.04);
+}
+
+.journey[data-renderer="webgl"] .finalPhoto {
+  opacity: 0;
+}
+
+.finalPhoto::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #050505b8, transparent 35%, transparent 70%, #05050594);
+}
+
+.vignette {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 48%, transparent 28%, #0505054d 76%, #050505a8 100%),
+    linear-gradient(180deg, #0505053b, transparent 19%, transparent 76%, #050505a3);
+}
+
+.chapterLayer {
+  position: absolute;
+  z-index: 7;
+  inset: 0;
+  pointer-events: none;
+}
+
+.chapter {
+  position: absolute;
+  top: 50%;
+  left: clamp(24px, 7vw, 108px);
+  width: min(36vw, 500px);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 22px;
+  align-items: start;
+  opacity: 0;
+  transform: translateY(24px);
+  visibility: hidden;
+  will-change: transform, opacity, filter;
+}
+
+.chapter:first-child {
+  opacity: 1;
+  visibility: visible;
+}
+
+.chapterNumber {
+  padding-top: 9px;
+  font-size: 8px;
+  letter-spacing: 0.2em;
+  color: #96948f;
+}
+
+.chapterCopy h2 {
+  font-family: var(--display);
+  font-size: clamp(46px, 6vw, 92px);
+  font-weight: 300;
+  line-height: 0.88;
+  letter-spacing: 0.04em;
+}
+
+.chapterCopy h2 span {
+  display: block;
+}
+
+.chapterCopy p {
+  margin-top: 18px;
+  font-size: clamp(9px, 0.75vw, 12px);
+  line-height: 1.8;
+  letter-spacing: 0.15em;
+  color: #b7b5af;
+}
+
+.currentColor {
+  display: flex;
+  gap: 8px;
+  margin-top: 28px;
+  font-size: 8px;
+  line-height: 1.6;
+  letter-spacing: 0.19em;
+  color: #85837e;
+}
+
+.currentColor strong {
+  color: #dedbd3;
+  font-weight: 400;
+}
+
+.finalName {
+  display: block;
+  margin-top: 25px;
+  font-family: var(--display);
+  font-size: clamp(22px, 2.5vw, 38px);
+  font-weight: 300;
+  letter-spacing: 0.11em;
+}
+
+.progress {
+  position: absolute;
+  z-index: 9;
+  top: 50%;
+  right: clamp(170px, 15vw, 230px);
+  width: 112px;
+  transform: translateY(-50%);
+}
+
+.progress ol {
+  display: grid;
+  gap: 15px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.progress li {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 8px;
+  font-size: 7px;
+  line-height: 1.4;
+  letter-spacing: 0.16em;
+  color: #6f6e6a;
+  transition: color 0.35s ease, transform 0.35s ease;
+}
+
+.progress li[data-active="true"] {
+  color: #efede7;
+  transform: translateX(-5px);
+}
+
+.progressTrack {
+  position: relative;
+  width: 100%;
+  height: 1px;
+  margin-top: 21px;
+  background: #ffffff1a;
+  overflow: hidden;
+}
+
+.progressTrack span {
+  display: block;
+  width: var(--journey-progress-width);
+  height: 100%;
+  background: #dedbd4;
+}
+
+.finalCta {
+  position: absolute;
+  z-index: 10;
+  left: 50%;
+  bottom: clamp(40px, 7vh, 82px);
+  width: min(560px, calc(100% - 48px));
+  transform: translateX(-50%) translateY(22px);
+  opacity: 0;
+  visibility: hidden;
+  text-align: center;
+  will-change: transform, opacity;
+}
+
+.finalCtaLabel {
+  display: block;
+  font-size: 7px;
+  letter-spacing: 0.22em;
+  color: #b1afa9;
+}
+
+.finalCta > strong {
+  display: block;
+  margin-top: 8px;
+  font-family: var(--display);
+  font-size: clamp(28px, 3.4vw, 52px);
+  font-weight: 300;
+  letter-spacing: 0.09em;
+}
+
+.journey[data-static="false"] .finalCtaLabel,
+.journey[data-static="false"] .finalCta > strong {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.journey[data-static="false"] .finalActions {
+  margin-top: 0;
+}
+
+.finalActions {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr;
+  width: min(440px, 100%);
+  margin: 18px auto 0;
+}
+
+.finalActions button {
+  min-height: 52px;
+  padding: 0 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid #ffffff32;
+  background: #070707b5;
+  backdrop-filter: blur(10px);
+  font-size: 8px;
+  letter-spacing: 0.12em;
+}
+
+.finalActions .primaryAction {
+  color: #090909;
+  background: #eeece6;
+  border-color: #eeece6;
+}
+
+.finalActions .primaryAction:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.scrollCue {
+  position: absolute;
+  z-index: 9;
+  left: clamp(22px, 6vw, 92px);
+  bottom: clamp(30px, 5vh, 54px);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 7px;
+  letter-spacing: 0.19em;
+  color: #888681;
+  opacity: var(--journey-cue-opacity);
+}
+
+.scrollCue i {
+  display: block;
+  width: 38px;
+  height: 1px;
+  background: #9b9994;
+  transform-origin: left center;
+  animation: journey-cue 1.8s ease-in-out infinite;
+}
+
+@keyframes journey-cue {
+  0%, 100% { transform: scaleX(0.35); opacity: 0.4; }
+  50% { transform: scaleX(1); opacity: 1; }
+}
+
+.staticStory {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .journey {
+    min-height: 300svh;
+  }
+
+  .sticky {
+    position: sticky;
+    top: 0;
+    min-height: 520px;
+  }
+
+  .eyebrow {
+    top: calc(90px + env(safe-area-inset-top));
+    left: 22px;
+  }
+
+  .chapter {
+    top: auto;
+    bottom: 19%;
+    left: 24px;
+    width: min(72vw, 430px);
+    gap: 14px;
+  }
+
+  .chapterCopy h2 {
+    font-size: clamp(42px, 11vw, 64px);
+  }
+
+  .chapter[data-journey-chapter="final"] {
+    top: 19%;
+    bottom: auto;
+  }
+
+  .progress {
+    top: calc(92px + env(safe-area-inset-top));
+    right: 22px;
+    bottom: auto;
+    width: 142px;
+    transform: none;
+  }
+
+  .progress ol {
+    display: flex;
+    justify-content: space-between;
+    gap: 5px;
+  }
+
+  .progress li {
+    display: block;
+  }
+
+  .progress li span:last-child {
+    display: none;
+  }
+
+  .progress li[data-active="true"] {
+    transform: translateY(-3px);
+  }
+
+  .progressTrack {
+    margin-top: 11px;
+  }
+
+  .fallbackRibbon {
+    width: 58px;
+    height: min(61svh, 540px);
+    transform: translate(-45%, -55%) rotate(-3deg)
+      skewX(var(--journey-mobile-skew));
+  }
+
+  .finalCta {
+    bottom: calc(82px + env(safe-area-inset-bottom));
+  }
+
+  .scrollCue {
+    display: none;
+  }
+}
+
+@media (max-width: 540px) {
+  .chapter {
+    bottom: 23%;
+    width: calc(100% - 48px);
+  }
+
+  .chapterCopy h2 {
+    font-size: clamp(39px, 12vw, 54px);
+  }
+
+  .chapterCopy p {
+    margin-top: 12px;
+  }
+
+  .currentColor,
+  .finalName {
+    margin-top: 16px;
+  }
+
+  .finalCta {
+    bottom: calc(84px + env(safe-area-inset-bottom));
+    width: calc(100% - 32px);
+  }
+
+  .finalActions {
+    margin-top: 12px;
+  }
+
+  .finalActions button {
+    min-height: 50px;
+    padding: 0 13px;
+    font-size: 7px;
+  }
+}
+
+.journey[data-static="true"] {
+  min-height: auto;
+  padding: 78px 6vw 96px;
+}
+
+.journey[data-static="true"] .sticky {
+  position: relative;
+  height: auto;
+  min-height: 58svh;
+  border: 1px solid #ffffff18;
+}
+
+.journey[data-static="true"] .eyebrow {
+  top: 124px;
+}
+
+.journey[data-static="true"] .chapterLayer,
+.journey[data-static="true"] .progress,
+.journey[data-static="true"] .scrollCue,
+.journey[data-static="true"] .fallbackRibbon {
+  display: none;
+}
+
+.journey[data-static="true"] .finalPhoto {
+  opacity: 1;
+  transform: none;
+}
+
+.journey[data-static="true"] .finalCta {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%);
+}
+
+.staticStory {
+  display: none;
+}
+
+.journey[data-static="true"] .staticStory {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.8fr) minmax(320px, 1.2fr);
+  gap: clamp(30px, 6vw, 90px);
+  align-items: center;
+  padding-top: 68px;
+}
+
+.staticStory ol {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  border-top: 1px solid #ffffff24;
+}
+
+.staticStory li {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  gap: 18px;
+  padding: 18px 0;
+  border-bottom: 1px solid #ffffff18;
+}
+
+.staticStory li > span {
+  padding-top: 3px;
+  font-size: 8px;
+  letter-spacing: 0.18em;
+  color: #85837f;
+}
+
+.staticStory strong {
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 300;
+  letter-spacing: 0.08em;
+}
+
+.staticStory p {
+  margin-top: 4px;
+  font-size: 9px;
+  line-height: 1.7;
+  letter-spacing: 0.11em;
+  color: #aaa8a2;
+}
+
+.staticPhoto {
+  position: relative;
+  min-height: 560px;
+  overflow: hidden;
+}
+
+@media (max-width: 700px) {
+  .journey[data-static="true"] {
+    padding: 72px 20px 86px;
+  }
+
+  .journey[data-static="true"] .sticky {
+    min-height: 66svh;
+  }
+
+  .journey[data-static="true"] .eyebrow {
+    top: calc(92px + env(safe-area-inset-top));
+  }
+
+  .journey[data-static="true"] .staticStory {
+    grid-template-columns: 1fr;
+    padding-top: 42px;
+  }
+
+  .staticPhoto {
+    min-height: 470px;
+    order: -1;
+  }
+}

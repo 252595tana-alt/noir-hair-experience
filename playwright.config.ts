@@ -19,6 +19,7 @@ export default defineConfig({
         "**/experience.spec.ts",
         "**/webgl.spec.ts",
         "**/hair-unwoven.spec.ts",
+        "**/cinematic-hair-journey.spec.ts",
       ],
       use: {
         ...devices["Desktop Chrome"],
@@ -31,6 +32,7 @@ export default defineConfig({
         "**/experience.spec.ts",
         "**/webgl.spec.ts",
         "**/hair-unwoven.spec.ts",
+        "**/cinematic-hair-journey.spec.ts",
       ],
       use: { ...devices["Pixel 7"], defaultBrowserType: "chromium" },
     },
@@ -40,6 +42,7 @@ export default defineConfig({
         "**/experience.spec.ts",
         "**/webgl.spec.ts",
         "**/hair-unwoven.spec.ts",
+        "**/cinematic-hair-journey.spec.ts",
       ],
       use: {
         viewport: { width: 820, height: 1180 },

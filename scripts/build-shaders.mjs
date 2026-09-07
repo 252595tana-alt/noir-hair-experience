@@ -7,6 +7,12 @@ const files = {
   transitionFragment: "HairTransition/transition.frag",
   hairRibbonVertex: "HairLoom/hairRibbon.vert",
   hairRibbonFragment: "HairLoom/hairRibbon.frag",
+  cinematicHairVertex: "CinematicHairJourney/cinematicHair.vert",
+  cinematicHairFragment: "CinematicHairJourney/cinematicHair.frag",
+  hairJourneyParticleVertex: "CinematicHairJourney/hairJourneyParticles.vert",
+  hairJourneyParticleFragment: "CinematicHairJourney/hairJourneyParticles.frag",
+  hairJourneyThreadsVertex: "CinematicHairJourney/hairJourneyThreads.vert",
+  hairJourneyThreadsFragment: "CinematicHairJourney/hairJourneyThreads.frag",
   particleVertex: "ParticleHead/particleHead.vert",
   particleFragment: "ParticleHead/particleHead.frag",
 };

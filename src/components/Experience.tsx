@@ -13,6 +13,7 @@ import { useMotion } from "@/lib/useMotion";
 import { Navigation } from "./Navigation/Navigation";
 import { MobileNavigation } from "./MobileNavigation/MobileNavigation";
 import { Hero } from "./Hero/Hero";
+import { CinematicHairJourney } from "./sections/CinematicHairJourney";
 import { HairUnwovenGallery } from "./sections/HairUnwovenGallery";
 import { Concept } from "./Hero/Concept";
 import { StyleExperience } from "./StyleExperience/StyleExperience";
@@ -113,6 +114,7 @@ export default function Experience({ children }: { children: ReactNode }) {
             {mode === "home" && (
               <>
                 <Hero />
+                <CinematicHairJourney />
                 <HairUnwovenGallery />
               </>
             )}

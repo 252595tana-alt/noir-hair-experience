@@ -423,7 +423,7 @@ export function HairUnwovenGallery() {
       data-transitioning={gallery.isTransitioning}
     >
       <header className={s.heading}>
-        <span>02 / EDITORIAL SELECTION</span>
+        <span>03 / EDITORIAL SELECTION</span>
         <h2>HAIR STYLE</h2>
         <p>YOUR HAIR, YOUR IDENTITY.</p>
       </header>

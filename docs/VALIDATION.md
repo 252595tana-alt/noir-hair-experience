@@ -135,7 +135,7 @@
 
 # Hair Unwoven Gallery（2026-09-06）
 
-HOMEのHERO直下に4作品のGalleryを追加。単一BufferGeometryを共有する2描画で、写真が帯状にほどけて次の写真へ移る。DOMの作品情報・VIEW／BOOKと既存のSTYLE／予約Storeを接続した。
+HOMEのCinematic Hair Journey直下に4作品のGalleryを配置。単一BufferGeometryを共有する2描画で、写真が帯状にほどけて次の写真へ移る。DOMの作品情報・VIEW／BOOKと既存のSTYLE／予約Storeを接続した。
 
 ## 追加分の検証結果（確認時点）
 
@@ -157,3 +157,13 @@ Desktopの対象外1件はMobile／Tablet projectで実行する実タッチの�
 追加テストでは、4作品の循環、PREVIOUS／NEXTと左右キー、wheel、マウスドラッグ、連続入力後の操作、全作品のVIEW／BOOK mapping、編集名、カラー互換性・ANGLE・OPTION・担当の引き継ぎ、Reduced Motion、WebGL不可時のDOM導線、縦スクロールと横スワイプ、画面遷移後のCanvas撤去とBack、SALON／画面外での停止、resize、Texture上限4、context lossを確認した。
 
 iPhone WebKitとAndroid Chromeはエミュレーションで確認済み。物理端末上のGPU性能と実際のSafari／Chromeタッチ挙動は、公開後の実機確認を残す。
+
+# Cinematic Hair Journey 検証記録（2026-09-08）
+
+- TypeScript strict / `pnpm typecheck`：成功。
+- ESLint / `pnpm lint`：エラー・警告なし。
+- Production build / `pnpm build`：成功。
+- Journey専用Playwright：10成功・5対象外・失敗0。
+- 全体Playwright 125ケース：109成功・16対象外・失敗0。
+- Desktop Chrome、Pixel 7相当、Tablet相当：各Chapter、WebGL、FINAL CTA、resize、fallback、横幅を確認。
+- Safari、iPhone Safari、Android Chromeの実機確認は未実施。
