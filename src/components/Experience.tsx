@@ -15,6 +15,10 @@ import { MobileNavigation } from "./MobileNavigation/MobileNavigation";
 import { Hero } from "./Hero/Hero";
 import { CinematicHairJourney } from "./sections/CinematicHairJourney";
 import { HairUnwovenGallery } from "./sections/HairUnwovenGallery";
+import { HairMaterialLab } from "./HairMaterialLab";
+import { DepthHairPortrait, portraitBookingPath } from "./DepthHairPortrait";
+import { defaultMaterialSelection, materialBookingPath } from "./HairMaterialLab/model";
+import { go } from "@/lib/navigation";
 import { Concept } from "./Hero/Concept";
 import { StyleExperience } from "./StyleExperience/StyleExperience";
 import { ModeBoundary, ModeLoading, SalonLoading } from "./ui/ModeBoundary";
@@ -46,6 +50,7 @@ import s from "./experience.module.css";
 import { VisualEnhancements } from "@/three/VisualEnhancements";
 export default function Experience({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
+  const [materialSelection, setMaterialSelection] = useState(defaultMaterialSelection);
   const salonOpen = useSiteStore((s) => s.salonOpen);
   const pathname = usePathname();
   const mode = useSiteStore((state) => state.mode);
@@ -116,6 +121,9 @@ export default function Experience({ children }: { children: ReactNode }) {
                 <Hero />
                 <CinematicHairJourney />
                 <HairUnwovenGallery />
+                <HairMaterialLab value={materialSelection} onSelectionChange={setMaterialSelection}
+                  active={!salonOpen} onBook={(selection) => go("booking", materialBookingPath(selection))} />
+                <DepthHairPortrait active={!salonOpen} onBook={(selection) => go("booking", portraitBookingPath(selection))} />
               </>
             )}
             {mode === "concept" && <Concept />}

@@ -1,5 +1,9 @@
 import { readFileSync, writeFileSync } from "node:fs";
 const files = {
+  depthPortraitVertex: "DepthHairPortrait/depthPortrait.vert",
+  depthPortraitFragment: "DepthHairPortrait/depthPortrait.frag",
+  hairMaterialVertex: "HairMaterialLab/hairMaterial.vert",
+  hairMaterialFragment: "HairMaterialLab/hairMaterial.frag",
   planeVertex: "shaders/plane.vert",
   noise: "shaders/noise.glsl",
   utils: "shaders/utils.glsl",

@@ -1,0 +1,25 @@
+{
+  "source": "/images/styles-v2/bleach.webp",
+  "width": 1024,
+  "height": 1536,
+  "depthConvention": "white-near-black-far",
+  "authoring": "image-guided hair matte and manually authored depth regions",
+  "samples": {
+    "background": [
+      70,
+      200
+    ],
+    "face": [
+      510,
+      650
+    ],
+    "fringe": [
+      335,
+      410
+    ],
+    "tips": [
+      720,
+      1220
+    ]
+  }
+}

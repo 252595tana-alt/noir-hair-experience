@@ -20,6 +20,8 @@ export default defineConfig({
         "**/webgl.spec.ts",
         "**/hair-unwoven.spec.ts",
         "**/cinematic-hair-journey.spec.ts",
+        "**/hair-material-lab.spec.ts",
+        "**/depth-hair-portrait.spec.ts",
       ],
       use: {
         ...devices["Desktop Chrome"],
@@ -33,6 +35,8 @@ export default defineConfig({
         "**/webgl.spec.ts",
         "**/hair-unwoven.spec.ts",
         "**/cinematic-hair-journey.spec.ts",
+        "**/hair-material-lab.spec.ts",
+        "**/depth-hair-portrait.spec.ts",
       ],
       use: { ...devices["Pixel 7"], defaultBrowserType: "chromium" },
     },
@@ -43,6 +47,8 @@ export default defineConfig({
         "**/webgl.spec.ts",
         "**/hair-unwoven.spec.ts",
         "**/cinematic-hair-journey.spec.ts",
+        "**/hair-material-lab.spec.ts",
+        "**/depth-hair-portrait.spec.ts",
       ],
       use: {
         viewport: { width: 820, height: 1180 },
@@ -52,7 +58,7 @@ export default defineConfig({
     },
     {
       name: "logic",
-      testMatch: ["**/selection.spec.ts", "**/production.spec.ts"],
+      testMatch: ["**/selection.spec.ts", "**/production.spec.ts", "**/hair-material-model.spec.ts", "**/depth-portrait-model.spec.ts"],
     },
   ],
 });

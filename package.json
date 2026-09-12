@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "test": "playwright test",
     "assets:demo": "node scripts/generate-hair.mjs",
+    "assets:depth": "node scripts/prepare-depth-portrait.mjs",
     "assets:import": "node scripts/import-hair-assets.mjs",
     "assets:color": "node scripts/prepare-color-assets.mjs",
     "assets:particles": "node scripts/sample-hero-particles.mjs",

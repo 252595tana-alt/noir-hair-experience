@@ -55,6 +55,12 @@ export function Navigation() {
             <span className={s.navMark}>↗</span>
           </button>
         ))}
+        {mode === "home" && <button onClick={() => document.getElementById("hair-material-lab")?.scrollIntoView({ behavior: "instant", block: "start" })}>
+          <span className={s.tiny}>LAB</span>MATERIAL LAB<span className={s.navMark}>↗</span>
+        </button>}
+        {mode === "home" && <button onClick={() => document.getElementById("depth-hair-portrait")?.scrollIntoView({ behavior: "instant", block: "start" })}>
+          <span className={s.tiny}>01</span>DEPTH PORTRAIT<span className={s.navMark}>↗</span>
+        </button>}
         <button
           className={s.navBook}
           aria-current={mode === "booking" ? "page" : undefined}

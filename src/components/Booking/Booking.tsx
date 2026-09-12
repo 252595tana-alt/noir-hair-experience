@@ -12,7 +12,11 @@ import { ResetSelection } from "../ResetSelection/ResetSelection";
 import { Arrow } from "../ui/Arrow";
 import s from "../experience.module.css";
 import { site } from "@/config/site";
-import { createLineBookingUrl } from "@/lib/bookingUrl";
+import { createLineBookingUrl, createMaterialWebBookingUrl, createPortraitWebBookingUrl } from "@/lib/bookingUrl";
+import { MaterialBookingSelection, useMaterialBookingSelection } from "../HairMaterialLab/MaterialBookingSelection";
+import { materialBookingMessage } from "../HairMaterialLab/model";
+import { PortraitBookingSelection, usePortraitBookingSelection } from "../DepthHairPortrait/PortraitBookingSelection";
+import { portraitBookingMessage } from "../DepthHairPortrait/model";
 import { track } from "@/lib/analytics";
 import { selectionProperties } from "@/lib/selectionAnalytics";
 import { hairUnwovenStyleById } from "@/data/hairUnwovenStyles";
@@ -22,8 +26,12 @@ export function Booking() {
   const editorialStyle = hairUnwovenStyleById(state.editorialStyleId);
   const [notice, setNotice] = useState("");
   const [messageOpen, setMessageOpen] = useState(false);
-  const message = createBookingMessage(state);
+  const materialSelection = useMaterialBookingSelection();
+  const portraitSelection = usePortraitBookingSelection();
+  const exclusiveSelection = materialSelection || portraitSelection;
+  const message = portraitSelection ? portraitBookingMessage(portraitSelection) : materialSelection ? materialBookingMessage(materialSelection) : createBookingMessage(state);
   const lineUrl = createLineBookingUrl(site.lineUrl, message);
+  const webUrl = portraitSelection ? createPortraitWebBookingUrl(site.webUrl, portraitSelection) : materialSelection ? createMaterialWebBookingUrl(site.webUrl, materialSelection) : site.webUrl;
   return (
     <section className={s.contentPage} aria-labelledby="booking-title">
       <div className={s.bookingLayout}>
@@ -39,7 +47,7 @@ export function Booking() {
             <br />
             サロンで、このイメージをかたちに。
           </p>
-          {style && (
+          {style && !exclusiveSelection && (
             <figure className={s.bookingLook}>
               <div>
                 <HairImage
@@ -59,7 +67,7 @@ export function Booking() {
               </figcaption>
             </figure>
           )}
-          <div className={s.consultation}>
+          {!exclusiveSelection && <div className={s.consultation}>
             <span>まだスタイルが決まっていない方</span>
             <button
               aria-pressed={state.consultation}
@@ -74,14 +82,14 @@ export function Booking() {
               <Arrow />
             </button>
             <p>今の選択を残したまま、ご相談いただけます。</p>
-          </div>
+          </div>}
         </div>
         <div className={s.bookingPanel}>
           <div className={s.planPanelTitle}>
             <span className={s.eyebrow}>YOUR PERSONAL PLAN</span>
             <span>↗</span>
           </div>
-          <PlanSummary full />
+          {portraitSelection ? <PortraitBookingSelection selection={portraitSelection} /> : materialSelection ? <MaterialBookingSelection selection={materialSelection} /> : <PlanSummary full />}
           <div className={s.bookingActions}>
             {lineUrl ? (
               <a
@@ -114,10 +122,10 @@ export function Booking() {
                 LINEで予約 <Arrow direction="up" />
               </button>
             )}
-            {site.webUrl ? (
+            {webUrl ? (
               <a
                 className={s.outlineButton}
-                href={site.webUrl}
+                href={webUrl}
                 rel="noopener noreferrer"
                 onClick={() =>
                   track("booking_web_click", {
@@ -152,10 +160,10 @@ export function Booking() {
           <button className={s.textButton} onClick={() => setMessageOpen(true)}>
             予約メッセージを確認 →
           </button>
-          <button className={s.textButton} onClick={() => go("menu")}>
+          {!exclusiveSelection && <button className={s.textButton} onClick={() => go("menu")}>
             ← メニューを調整する
-          </button>
-          <ResetSelection />
+          </button>}
+          {!exclusiveSelection && <ResetSelection />}
         </div>
       </div>
       <Modal

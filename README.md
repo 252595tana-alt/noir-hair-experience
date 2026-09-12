@@ -657,6 +657,18 @@ Chrome / Edge / WebKit Desktop / iPhone WebKit相当 / Android Chrome相当で�
 
 Safari本体・実機iPhone・実機Android・OSによるメモリ圧迫・ネイティブLINE起動は、このWindows環境では保証できません。WebKitエミュレーションとの違いを残さず報告します。Three.js / R3F由来のClock非推奨警告は依存側に残ります。画像は元解像度・構図差の制約があります。公開ドメインの実測CWVと予約完了率は公開後に計測してください。
 
+### Hair Material Lab
+
+HOMEのGalleryの次に、独立した3D毛束の質感プレビューを追加しました。HOMEの「MATERIAL LAB」（スマホではMENU内）から移動できます。STRAIGHT / WAVE、4色、MATTE / NATURAL / SILKYを比較し、BOOK THIS STYLEから選択した3項目を予約画面・LINE用文面・WEB予約URLへ引き継ぎます。
+
+コンポーネントAPI、シェーダー、スマホの負荷調整、予約先への接続、テスト手順は [Hair Material Labの実装・連携仕様](docs/HAIR_MATERIAL_LAB.md) を参照してください。
+
+### Depth Hair Portrait
+
+HOMEのHair Material Labの次に、1枚のモデル写真と対応するDepth Map / Hair Maskを使う独立コンポーネントを追加しました。控えめなマウス・タッチparallax、髪だけのBLACK / BROWN / ASH / BEIGE切替、元写真との比較に対応。写真に対応するSILK STRAIGHTと選択カラーを保存し、BOOK THIS STYLEから予約画面・LINE・WEB予約へ渡します。
+
+スマホはPlane分割・Shader品質・ポインター強度を減らし、DPRを最大1.25に制限します。素材の生成方式、公開API、予約接続と検証手順は [Depth Hair Portraitの実装・連携仕様](docs/DEPTH_HAIR_PORTRAIT.md) を参照してください。
+
 ### Phase 4追加ディレクトリ
 
 `src/config/site.ts`、`lib/seo.ts`、`components/ServerContent.tsx`、`components/RouteMetadata.tsx`、`app/robots.ts`、`app/sitemap.ts`、`lib/bookingUrl.ts`、`lib/analytics.ts`、`lib/selectionAnalytics.ts`、`lib/modeModules.ts`、`lib/resourceCache.ts`、`hooks/useReducedData.ts`、`components/ui/HairImage.tsx`、`data/imageManifest.json`、`three/*/*Canvas.tsx`、`public/og`、`tests/production.spec.ts`、`scripts/prepare-production-assets.mjs`、`scripts/qa-browsers.mjs`、`scripts/audit-performance.mjs`、`.env.example`。
