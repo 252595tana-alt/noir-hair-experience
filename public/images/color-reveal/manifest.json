@@ -1,0 +1,13 @@
+{
+  "source": "/images/styles-v2/bleach.webp",
+  "mask": "/images/depth-portrait/hair-mask.png",
+  "width": 1024,
+  "height": 1536,
+  "seedFormat": "little-endian float32: u, v (Y up), delay, variation",
+  "counts": {
+    "desktop": 12000,
+    "mobile": 2400
+  },
+  "maskThreshold": 220,
+  "flow": "RG = world-space XY direction encoded as direction * 0.5 + 0.5; image-guided, art-directed center part"
+}

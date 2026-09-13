@@ -12,7 +12,9 @@ import { ResetSelection } from "../ResetSelection/ResetSelection";
 import { Arrow } from "../ui/Arrow";
 import s from "../experience.module.css";
 import { site } from "@/config/site";
-import { createLineBookingUrl, createMaterialWebBookingUrl, createPortraitWebBookingUrl } from "@/lib/bookingUrl";
+import { createLineBookingUrl, createMaterialWebBookingUrl, createPortraitWebBookingUrl, createRevealWebBookingUrl } from "@/lib/bookingUrl";
+import { RevealBookingSelection, useRevealBookingSelection } from "../HairColorParticleReveal/RevealBookingSelection";
+import { revealBookingMessage } from "../HairColorParticleReveal/model";
 import { MaterialBookingSelection, useMaterialBookingSelection } from "../HairMaterialLab/MaterialBookingSelection";
 import { materialBookingMessage } from "../HairMaterialLab/model";
 import { PortraitBookingSelection, usePortraitBookingSelection } from "../DepthHairPortrait/PortraitBookingSelection";
@@ -28,10 +30,11 @@ export function Booking() {
   const [messageOpen, setMessageOpen] = useState(false);
   const materialSelection = useMaterialBookingSelection();
   const portraitSelection = usePortraitBookingSelection();
-  const exclusiveSelection = materialSelection || portraitSelection;
-  const message = portraitSelection ? portraitBookingMessage(portraitSelection) : materialSelection ? materialBookingMessage(materialSelection) : createBookingMessage(state);
+  const revealSelection = useRevealBookingSelection();
+  const exclusiveSelection = materialSelection || portraitSelection || revealSelection;
+  const message = revealSelection ? revealBookingMessage(revealSelection) : portraitSelection ? portraitBookingMessage(portraitSelection) : materialSelection ? materialBookingMessage(materialSelection) : createBookingMessage(state);
   const lineUrl = createLineBookingUrl(site.lineUrl, message);
-  const webUrl = portraitSelection ? createPortraitWebBookingUrl(site.webUrl, portraitSelection) : materialSelection ? createMaterialWebBookingUrl(site.webUrl, materialSelection) : site.webUrl;
+  const webUrl = revealSelection ? createRevealWebBookingUrl(site.webUrl, revealSelection) : portraitSelection ? createPortraitWebBookingUrl(site.webUrl, portraitSelection) : materialSelection ? createMaterialWebBookingUrl(site.webUrl, materialSelection) : site.webUrl;
   return (
     <section className={s.contentPage} aria-labelledby="booking-title">
       <div className={s.bookingLayout}>
@@ -89,7 +92,7 @@ export function Booking() {
             <span className={s.eyebrow}>YOUR PERSONAL PLAN</span>
             <span>↗</span>
           </div>
-          {portraitSelection ? <PortraitBookingSelection selection={portraitSelection} /> : materialSelection ? <MaterialBookingSelection selection={materialSelection} /> : <PlanSummary full />}
+          {revealSelection ? <RevealBookingSelection selection={revealSelection} /> : portraitSelection ? <PortraitBookingSelection selection={portraitSelection} /> : materialSelection ? <MaterialBookingSelection selection={materialSelection} /> : <PlanSummary full />}
           <div className={s.bookingActions}>
             {lineUrl ? (
               <a

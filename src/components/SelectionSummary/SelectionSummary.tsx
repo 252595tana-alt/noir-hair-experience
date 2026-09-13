@@ -17,7 +17,7 @@ export function SelectionSummary() {
     return null;
   return (
     <aside className={s.selectionSummary} aria-label="現在の選択">
-      <span className={s.eyebrow}>YOUR SELECTION</span>
+      <span className={s.eyebrow}>{state.mode === "color" ? "GALLERY SELECTION" : "YOUR SELECTION"}</span>
       <p>
         {editorialStyle?.title ??
           styleById(state.selectedStyleId)?.name ??

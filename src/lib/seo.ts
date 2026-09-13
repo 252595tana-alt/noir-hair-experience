@@ -14,6 +14,7 @@ export function pageInfo(path: string) {
     "/": "HAIR IS IDENTITY.",
     "/style": "ヘアスタイル一覧",
     "/color": "カラーを比較する",
+    "/color-reveal": "ヘアカラー・パーティクル体験",
     "/stylist": "スタイリスト",
     "/menu": "メニュー・料金",
     "/booking": "ご予約・相談",
@@ -49,7 +50,7 @@ export function metadataFor(path: string): Metadata {
     description: info.description,
     alternates: { canonical: absoluteUrl(info.path) },
     robots: {
-      index: indexable && info.found && !["/booking", "/color"].includes(info.path),
+      index: indexable && info.found && !["/booking", "/color", "/color-reveal"].includes(info.path),
       follow: indexable,
     },
     openGraph: {

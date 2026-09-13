@@ -16,6 +16,7 @@ const allowed = [
   "concept",
   "style",
   "color",
+  "color-reveal",
   "stylist",
   "menu",
   "booking",

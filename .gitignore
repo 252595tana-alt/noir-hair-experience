@@ -12,3 +12,4 @@ playwright-report/
 docs/audit/
 docs/screenshots/
 .vercel/
+.vercel

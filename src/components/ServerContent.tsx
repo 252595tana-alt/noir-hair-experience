@@ -67,6 +67,14 @@ export function ServerContent({ path }: { path: string }) {
           ))}
         </dl>
       )}
+      {path === "/color-reveal" && (
+        <>
+          <p>BLACK / BROWN / ASH / BEIGE / SILVERから髪色を選び、仕上がりイメージを比較できます。</p>
+          <Link href="/booking?source=hair-color-particle-reveal&style=silk-straight&color=beige">
+            SILK STRAIGHT / BEIGEで予約・相談する →
+          </Link>
+        </>
+      )}
       {path === "/salon" && (
         <dl>
           {salonDetails.map(([name, value]) => (
@@ -79,6 +87,7 @@ export function ServerContent({ path }: { path: string }) {
       )}
       <nav aria-label="サイト内リンク">
         <Link href="/style">STYLE</Link>
+        <Link href="/color-reveal">COLOR REVEAL</Link>
         <Link href="/stylist">STYLIST</Link>
         <Link href="/menu">MENU</Link>
         <Link href="/salon">SALON</Link>

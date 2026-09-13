@@ -669,6 +669,12 @@ HOMEのHair Material Labの次に、1枚のモデル写真と対応するDepth M
 
 スマホはPlane分割・Shader品質・ポインター強度を減らし、DPRを最大1.25に制限します。素材の生成方式、公開API、予約接続と検証手順は [Depth Hair Portraitの実装・連携仕様](docs/DEPTH_HAIR_PORTRAIT.md) を参照してください。
 
+### Hair Color Particle Reveal
+
+TOPの静止画入口から`/color-reveal`へ遷移し、BLACK / BROWN / ASH / BEIGE / SILVERを切り替える写真ベースのカラー体験を利用できます。髪マスクから発生する微細なダストと髪色の変化を同期。WebGPUではTSLのCompute Shaderで位置・速度を更新し、非対応時はWebGLの頂点シェーダーへ切り替えます。Mobileの粒子数・DPR・Noiseを削減し、選択したstyle / colorは保存して「BOOK THIS COLOR」から予約へ引き継ぎます。
+
+素材、予約先設定、GPU処理と検証は [Hair Color Particle Revealの実装・連携仕様](docs/HAIR_COLOR_PARTICLE_REVEAL.md) を参照してください。
+
 ### Phase 4追加ディレクトリ
 
 `src/config/site.ts`、`lib/seo.ts`、`components/ServerContent.tsx`、`components/RouteMetadata.tsx`、`app/robots.ts`、`app/sitemap.ts`、`lib/bookingUrl.ts`、`lib/analytics.ts`、`lib/selectionAnalytics.ts`、`lib/modeModules.ts`、`lib/resourceCache.ts`、`hooks/useReducedData.ts`、`components/ui/HairImage.tsx`、`data/imageManifest.json`、`three/*/*Canvas.tsx`、`public/og`、`tests/production.spec.ts`、`scripts/prepare-production-assets.mjs`、`scripts/qa-browsers.mjs`、`scripts/audit-performance.mjs`、`.env.example`。

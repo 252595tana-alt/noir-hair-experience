@@ -1,6 +1,15 @@
 import { safeHttps } from "@/config/site";
 import type { HairMaterialSelection } from "@/components/HairMaterialLab/model";
 import type { DepthPortraitSelection } from "@/components/DepthHairPortrait/model";
+import type { RevealSelection } from "@/components/HairColorParticleReveal/model";
+export function createRevealWebBookingUrl(base: string | undefined, selection: RevealSelection): string | undefined {
+  const safe = safeHttps(base);
+  if (!safe) return undefined;
+  const url = new URL(safe);
+  url.searchParams.set("source", "hair-color-particle-reveal");
+  for (const [key, value] of Object.entries(selection)) url.searchParams.set(key, value);
+  return url.href;
+}
 export function createPortraitWebBookingUrl(base: string | undefined, selection: DepthPortraitSelection): string | undefined {
   const safe = safeHttps(base);
   if (!safe) return undefined;

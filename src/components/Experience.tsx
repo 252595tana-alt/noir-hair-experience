@@ -17,6 +17,9 @@ import { CinematicHairJourney } from "./sections/CinematicHairJourney";
 import { HairUnwovenGallery } from "./sections/HairUnwovenGallery";
 import { HairMaterialLab } from "./HairMaterialLab";
 import { DepthHairPortrait, portraitBookingPath } from "./DepthHairPortrait";
+import { HairColorParticleReveal } from "./HairColorParticleReveal/HairColorParticleReveal";
+import { HairColorRevealEntry } from "./HairColorParticleReveal/HairColorRevealEntry";
+import { revealBookingPath } from "./HairColorParticleReveal/model";
 import { defaultMaterialSelection, materialBookingPath } from "./HairMaterialLab/model";
 import { go } from "@/lib/navigation";
 import { Concept } from "./Hero/Concept";
@@ -121,6 +124,7 @@ export default function Experience({ children }: { children: ReactNode }) {
                 <Hero />
                 <CinematicHairJourney />
                 <HairUnwovenGallery />
+                <HairColorRevealEntry />
                 <HairMaterialLab value={materialSelection} onSelectionChange={setMaterialSelection}
                   active={!salonOpen} onBook={(selection) => go("booking", materialBookingPath(selection))} />
                 <DepthHairPortrait active={!salonOpen} onBook={(selection) => go("booking", portraitBookingPath(selection))} />
@@ -129,6 +133,7 @@ export default function Experience({ children }: { children: ReactNode }) {
             {mode === "concept" && <Concept />}
             {mode === "style" && <StyleExperience />}
             {mode === "color" && <StyleExperience colorMode />}
+            {mode === "reveal" && <HairColorParticleReveal active={!salonOpen} onBook={(selection) => go("booking", revealBookingPath(selection))} />}
             {mode === "stylist" && <StylistExperience />}
             {mode === "menu" && <MenuPlan />}
             {mode === "booking" && <Booking />}

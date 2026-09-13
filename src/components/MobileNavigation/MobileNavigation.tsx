@@ -36,6 +36,7 @@ export function MobileNavigation() {
         id="mobile-menu"
       >
         <div className={s.mobileMenuLinks}>
+          {(mode === "home" || mode === "color") && <button onClick={() => navigate("reveal")}>COLOR REVEAL ↗</button>}
           {mode === "home" && <button onClick={() => {
             setOpen(false);
             requestAnimationFrame(() => document.getElementById("hair-material-lab")?.scrollIntoView({ behavior: "instant", block: "start" }));

@@ -9,7 +9,7 @@ export function RouteMetadata() {
     const info = pageInfo(pathname);
     document.title = info.title;
     const values: Record<string, string> = {
-      robots: `${indexable&&!['/color','/booking'].includes(pathname)?'index':'noindex'}, ${indexable?'follow':'nofollow'}`,
+      robots: `${indexable&&!['/color','/color-reveal','/booking'].includes(pathname)?'index':'noindex'}, ${indexable?'follow':'nofollow'}`,
       description: info.description,
       "og:title": info.title,
       "og:description": info.description,
