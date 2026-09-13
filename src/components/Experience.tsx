@@ -13,7 +13,6 @@ import { useMotion } from "@/lib/useMotion";
 import { Navigation } from "./Navigation/Navigation";
 import { MobileNavigation } from "./MobileNavigation/MobileNavigation";
 import { Hero } from "./Hero/Hero";
-import { CinematicHairJourney } from "./sections/CinematicHairJourney";
 import { HairUnwovenGallery } from "./sections/HairUnwovenGallery";
 import { HairMaterialLab } from "./HairMaterialLab";
 import { DepthHairPortrait, portraitBookingPath } from "./DepthHairPortrait";
@@ -122,7 +121,6 @@ export default function Experience({ children }: { children: ReactNode }) {
             {mode === "home" && (
               <>
                 <Hero />
-                <CinematicHairJourney />
                 <HairUnwovenGallery />
                 <HairColorRevealEntry />
                 <HairMaterialLab value={materialSelection} onSelectionChange={setMaterialSelection}
