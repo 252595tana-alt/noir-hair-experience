@@ -19,10 +19,10 @@ export function HairColorRevealEntry() {
   };
   return <section className={s.entry} aria-labelledby="color-reveal-entry-title" data-testid="color-reveal-entry">
     <div className={s.entryCopy}>
-      <p className={s.eyebrow}>NŌIR / INTERACTIVE COLOR EXPERIENCE</p>
-      <h2 id="color-reveal-entry-title">COLOR,<br /><em>IN MOTION.</em></h2>
-      <p>髪色がほどけ、光の中で新しい表情へ。<br />5つのカラーを、あなたの感性で。</p>
-      <Link href="/color-reveal" onClick={enter}>ENTER THE COLOR EXPERIENCE <span aria-hidden="true">↗</span></Link>
+      <p className={s.eyebrow}>HAIR COLOR</p>
+      <h2 id="color-reveal-entry-title">FIND YOUR<br /><em>COLOR.</em></h2>
+      <p>5色を写真で比較できます。</p>
+      <Link href="/color-reveal" onClick={enter}>COLORを試す <span aria-hidden="true">↗</span></Link>
     </div>
     <Link className={s.entryVisual} href="/color-reveal" onClick={enter} aria-label="Hair Color Particle Revealを体験する">
       <SafeImage src={asset.photo} alt={`${asset.name} / ${selection.color.toUpperCase()}`} fill sizes="(max-width: 700px) 88vw, 42vw" />

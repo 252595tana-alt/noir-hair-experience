@@ -12,6 +12,7 @@ export function SelectionSummary() {
   if (
     state.mode === "home" ||
     state.mode === "booking" ||
+    state.mode === "reveal" ||
     (!state.selectedStyleId && !state.colorChosen && !state.selectedStylistId)
   )
     return null;

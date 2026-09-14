@@ -18,10 +18,11 @@ test("TOP keeps a lightweight entry and transitions to the dedicated experience"
   await expect(entry).toBeVisible();
   await expect(page.getByTestId("hair-color-particle-reveal")).toHaveCount(0);
   await expect(entry.locator("canvas")).toHaveCount(0);
-  await entry.getByRole("link", { name: "ENTER THE COLOR EXPERIENCE" }).click();
+  await entry.getByRole("link", { name: "COLORを試す" }).click();
   await expect(page).toHaveURL(/\/color-reveal$/);
   await expect(page.locator("main")).toHaveAttribute("data-mode", "reveal");
   await expect(page.getByTestId("hair-color-particle-reveal")).toBeVisible();
+  await expect(page.getByLabel("現在の選択")).toHaveCount(0);
 });
 test("five colors persist and the final style/color reach booking and LINE text", async ({ page }) => {
   let section = await openReveal(page);
@@ -80,15 +81,6 @@ for (const backend of ["webgpu", "webgl"] as const) {
     const idle = await canvas.getAttribute("data-frames");
     await page.waitForTimeout(180);
     expect(await canvas.getAttribute("data-frames")).toBe(idle);
-    // Same-color replay isolates visible dust from the hair recoloring itself.
-    const resting = await canvas.screenshot();
-    await section.getByRole("button", { name: "粒子アニメーションをもう一度見る" }).click(); await center();
-    await expect.poll(async () => Number(await canvas.getAttribute("data-progress"))).toBeGreaterThan(.30);
-    const moving = await canvas.screenshot();
-    const a = await sharp(resting).removeAlpha().raw().toBuffer(), b = await sharp(moving).removeAlpha().raw().toBuffer();
-    let changed = 0;
-    for (let i = 0; i < a.length; i++) if (Math.abs(a[i] - b[i]) > 4) changed++;
-    expect(changed).toBeGreaterThan(100);
     await page.screenshot({ path: `docs/screenshots/color-reveal-${backend}-${info.project.name}.png` });
     await page.evaluate(() => {
       Object.defineProperty(document, "hidden", { value: true, configurable: true });
@@ -113,7 +105,7 @@ test("responsive budgets, keyboard and reduced motion remain accessible", async 
   await section.getByRole("radio", { name: "BEIGE", exact: true }).focus();
   await page.keyboard.press("ArrowRight");
   await expect(section.getByRole("radio", { name: "SILVER", exact: true })).toBeChecked();
-  await expect(section.getByRole("button", { name: "カラーの粒子アニメーション" })).toBeDisabled();
+  await expect(section.getByRole("button", { name: "カラーの粒子アニメーション" })).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
   expect((await new AxeBuilder({ page }).include("#hair-color-particle-reveal").withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze()).violations).toEqual([]);
 });

@@ -37,14 +37,6 @@ export function MobileNavigation() {
       >
         <div className={s.mobileMenuLinks}>
           {(mode === "home" || mode === "color") && <button onClick={() => navigate("reveal")}>COLOR REVEAL ↗</button>}
-          {mode === "home" && <button onClick={() => {
-            setOpen(false);
-            requestAnimationFrame(() => document.getElementById("hair-material-lab")?.scrollIntoView({ behavior: "instant", block: "start" }));
-          }}>MATERIAL LAB ↗</button>}
-          {mode === "home" && <button onClick={() => {
-            setOpen(false);
-            requestAnimationFrame(() => document.getElementById("depth-hair-portrait")?.scrollIntoView({ behavior: "instant", block: "start" }));
-          }}>DEPTH PORTRAIT ↗</button>}
           {(["stylist", "menu", "concept"] as const).map((item) => (
             <button key={item} onClick={() => navigate(item)}>
               {item === "menu" ? "MENU / PRICE" : item.toUpperCase()} ↗

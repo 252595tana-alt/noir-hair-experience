@@ -25,7 +25,6 @@ export function HairColorParticleReveal({ active = true, onBook }: HairColorPart
   const stage = useRef<HTMLDivElement>(null), pointer = useRef({ x: 10, y: 10 });
   const [nearby, setNearby] = useState(false), [visible, setVisible] = useState(false), [pageVisible, setPageVisible] = useState(true);
   const [failed, setFailed] = useState(false), [ready, setReady] = useState({ key: "", engine: "loading" });
-  const [motion, setMotion] = useState(true), [replay, setReplay] = useState(0);
   const compactDevice = useSyncExternalStore(subscribeDevice, () => matchMedia(deviceQuery).matches, () => true);
   const reducedData = useReducedData(), reducedMotion = useReducedMotion();
   const compact = compactDevice || reducedData, canvasKey = `${selection.style}-${compact}`;
@@ -33,7 +32,7 @@ export function HairColorParticleReveal({ active = true, onBook }: HairColorPart
   const onFailure = useCallback(() => setFailed(true), []);
   const live = ready.key === canvasKey && !failed;
   const engine = failed ? "fallback" : live ? ready.engine : "loading";
-  const animate = motion && !reducedMotion;
+  const animate = !reducedMotion;
   useEffect(() => {
     const node = stage.current;
     if (!node) return;
@@ -49,8 +48,7 @@ export function HairColorParticleReveal({ active = true, onBook }: HairColorPart
   return <section id="hair-color-particle-reveal" className={s.section} aria-label="Hair Color Particle Reveal"
     data-testid="hair-color-particle-reveal" data-engine={engine} data-style={selection.style} data-color={selection.color}>
     <header className={s.heading}>
-      <div><p className={s.eyebrow}>NŌIR / HAIR COLOR PARTICLE REVEAL</p><h2>COLOR,<br /><em>IN MOTION.</em></h2></div>
-      <p className={s.intro}>色がほどける。私が変わる。<br />あなたの色を、ここで見つけて。</p>
+      <div><p className={s.eyebrow}>NŌIR / COLOR</p><h2>FIND YOUR<br /><em>COLOR.</em></h2></div>
     </header>
     <div className={s.workspace}>
       <div ref={stage} className={s.stage} role="img" aria-label={`${asset.name} / ${selection.color.toUpperCase()} のヘアカラープレビュー`}
@@ -69,38 +67,26 @@ export function HairColorParticleReveal({ active = true, onBook }: HairColorPart
           }} />
         </div>
         {nearby && !failed && <RevealCanvas key={canvasKey} selection={selection} compact={compact} active={active && visible && pageVisible}
-          motion={animate} replay={replay} pointer={pointer} onReady={onReady} onFailure={onFailure} />}
-        <div className={s.photoTop} aria-hidden="true"><span>THE COLOR STUDY</span><span>0{revealColors.indexOf(selection.color) + 1} / 05</span></div>
+          motion={animate} replay={0} pointer={pointer} onReady={onReady} onFailure={onFailure} />}
         <div className={s.photoBottom} aria-hidden="true"><span>{asset.name}</span><strong>{selection.color.toUpperCase()}</strong></div>
       </div>
       <div className={s.controls}>
-        <p className={s.eyebrow}>ONE STYLE. FIVE EXPRESSIONS.</p>
-        <div className={s.styleInfo}><span>SELECTED STYLE</span><h3>{asset.name}</h3><p>{asset.description}</p></div>
         <fieldset className={s.colorGroup}>
-          <legend>CHOOSE YOUR COLOR <span>髪色を選ぶ</span></legend>
-          <div className={s.colors}>{revealColors.map((color, index) => <label key={color} className={s.color} data-selected={selection.color === color}>
+          <legend>髪色を選ぶ</legend>
+          <div className={s.colors}>{revealColors.map((color) => <label key={color} className={s.color} data-selected={selection.color === color}>
             <input type="radio" name={`${id}-color`} value={color} checked={selection.color === color} onChange={() => setRevealSelection({ ...selection, color })} />
             <span className={s.swatch} style={{ "--tone": revealTones[color].swatch } as CSSProperties} aria-hidden="true" />
-            <span className={s.colorName}>{color.toUpperCase()}</span><span className={s.colorIndex} aria-hidden="true">0{index + 1}</span>
-            <span className={s.check} aria-hidden="true">{selection.color === color ? "✓" : "+"}</span>
+            <span className={s.colorName}>{color.toUpperCase()}</span>
           </label>)}</div>
           <p className={s.description} aria-live="polite">{tone.description}</p>
         </fieldset>
-        <div className={s.motionRow}>
-          <button type="button" aria-label="カラーの粒子アニメーション" aria-pressed={animate} disabled={reducedMotion || failed}
-            onClick={() => setMotion(!motion)}>COLOR IN MOTION <span>{animate ? "ON ●" : "OFF ○"}</span></button>
-          <button type="button" className={s.replay} disabled={!animate || !live} onClick={() => setReplay(replay + 1)} aria-label="粒子アニメーションをもう一度見る">REPLAY ↻</button>
-        </div>
-        <p className={s.motionHint}>{failed ? "静止写真でカラーを比較できます。選択は予約へ引き継がれます。" : reducedMotion ? "動きを抑えて表示しています。5つのカラーを比較できます。" : "色を選ぶと、細かな色素が毛流れに沿ってほどけます。"}</p>
-        <div className={s.selection} aria-live="polite"><span>YOUR SELECTION</span><p>{asset.name} <span>/</span> {selection.color.toUpperCase()}</p></div>
         <a className={s.book} href={revealBookingPath(selection)} onClick={(event) => {
           if (onBook && event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
             event.preventDefault(); onBook({ ...selection });
           }
         }}>BOOK THIS COLOR <span aria-hidden="true">↗</span></a>
-        <p className={s.bookingHint}>このスタイルとカラーで予約・相談する</p>
+        <p className={s.bookingHint}>仕上がりは髪の状態により異なります。</p>
       </div>
     </div>
-    <footer className={s.footer}><span>A QUIET CHANGE. A NEW EXPRESSION.</span><p>カラーの仕上がりイメージです。実際の発色は髪の状態や施術によって異なります。</p></footer>
   </section>;
 }
